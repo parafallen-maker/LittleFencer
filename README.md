@@ -116,11 +116,14 @@ LittleFencer 是一款基于 AI 姿态识别的青少年佩剑（Saber）训练�
 ## 📁 项目结构
 
 ```
-LittleFencer/                    # Android 项目
+LittleFencer/                        # 项目根目录
+├── docs/                            # 文档目录
+│
+LittleFencer-Android/                # Android 项目 (同级目录)
 ├── app/src/main/java/com/littlefencer/app/
-│   ├── MainActivity.kt          # 主训练界面
-│   ├── camera/CameraManager.kt  # CameraX 管理
-│   ├── pose/PoseDetector.kt     # MediaPipe 姿态检测
+│   ├── MainActivity.kt              # 主训练界面
+│   ├── camera/CameraManager.kt      # CameraX 管理
+│   ├── pose/PoseDetector.kt         # MediaPipe 姿态检测
 │   ├── logic/
 │   │   ├── FencingStateEngine.kt    # 击剑状态机
 │   │   ├── ActionModels.kt          # 动作模型定义
@@ -129,8 +132,11 @@ LittleFencer/                    # Android 项目
 │   ├── feedback/AudioFeedbackManager.kt
 │   ├── recorder/VideoRecorder.kt
 │   └── gallery/GalleryActivity.kt
+├── build.gradle.kts
+├── settings.gradle.kts
+└── gradlew
 │
-LittleFencer-iOS/                # iOS 项目 (同级目录)
+LittleFencer-iOS/                    # iOS 项目 (同级目录)
 ├── LittleFencer.xcodeproj
 └── LittleFencer/
     ├── App/                     # SwiftUI App 入口
@@ -187,8 +193,8 @@ LittleFencer-MiniProgram/        # 微信小程序 (同级目录)
 
 ```bash
 # 克隆仓库
-git clone https://github.com/user/LittleFencer.git
-cd LittleFencer
+git clone https://github.com/parafallen-maker/LittleFencer.git
+cd LittleFencer/LittleFencer-Android
 
 # 构建 Debug APK
 ./gradlew assembleDebug
@@ -208,7 +214,7 @@ cd LittleFencer
 
 ```bash
 # iOS 项目在同级目录
-cd ../LittleFencer-iOS
+cd LittleFencer/LittleFencer-iOS
 
 # 使用 Xcode 打开
 open LittleFencer.xcodeproj
@@ -221,7 +227,7 @@ xcodebuild -scheme LittleFencer -sdk iphoneos build
 
 ```bash
 # Web PWA 项目在同级目录
-cd ../LittleFencer-Web
+cd LittleFencer/LittleFencer-Web
 
 # 启动本地服务器
 python3 -m http.server 8080
@@ -236,7 +242,7 @@ open http://localhost:8080
 
 ```bash
 # 小程序项目在同级目录
-cd ../LittleFencer-MiniProgram
+cd LittleFencer/LittleFencer-MiniProgram
 
 # 用微信开发者工具打开项目
 # 1. 填写 AppID

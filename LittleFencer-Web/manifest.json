@@ -1,0 +1,46 @@
+{
+    "name": "LittleFencer",
+    "short_name": "LittleFencer",
+    "description": "AI驱动的青少年佩剑训练助手",
+    "start_url": "/",
+    "display": "standalone",
+    "orientation": "any",
+    "background_color": "#0f0f1a",
+    "theme_color": "#1a1a2e",
+    "icons": [
+        {
+            "src": "assets/icons/ic_launcher.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "assets/icons/ic_launcher_round.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "assets/icons/ic_launcher_foreground.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "assets/screenshots/screenshot_training.png",
+            "sizes": "1080x1920",
+            "type": "image/png",
+            "label": "训练界面 - AI实时姿态检测"
+        },
+        {
+            "src": "assets/screenshots/screenshot_gallery.png",
+            "sizes": "1080x1920",
+            "type": "image/png",
+            "label": "视频库 - 训练回放"
+        }
+    ],
+    "categories": ["sports", "fitness", "health"],
+    "lang": "zh-CN",
+    "dir": "ltr"
+}

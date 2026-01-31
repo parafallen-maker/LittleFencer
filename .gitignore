@@ -81,3 +81,19 @@ node_modules/
 
 # Secrets
 secrets.properties
+
+# iOS
+*.xcuserstate
+*.xcworkspace
+xcuserdata/
+DerivedData/
+.build/
+Pods/
+Podfile.lock
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Web
+dist/
+*.local

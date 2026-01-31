@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+    <linearGradient id="sword" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e94560"/>
+      <stop offset="100%" style="stop-color:#ff6b6b"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="url(#bg)"/>
+  
+  <!-- Sword blade -->
+  <path d="M 140 380 L 320 120 L 340 140 L 160 400 Z" fill="#c0c0c0" stroke="#808080" stroke-width="2"/>
+  
+  <!-- Sword guard -->
+  <ellipse cx="170" cy="360" rx="50" ry="15" fill="url(#sword)"/>
+  
+  <!-- Sword handle -->
+  <rect x="155" y="370" width="30" height="60" rx="5" fill="#2d2d2d"/>
+  
+  <!-- Sword pommel -->
+  <circle cx="170" cy="440" r="15" fill="url(#sword)"/>
+  
+  <!-- Fencer silhouette -->
+  <g fill="#4ade80" opacity="0.8">
+    <!-- Head -->
+    <circle cx="320" cy="160" r="25"/>
+    <!-- Body -->
+    <path d="M 295 185 Q 310 220 295 280 L 345 280 Q 330 220 345 185 Z"/>
+    <!-- Front leg (lunging) -->
+    <path d="M 295 280 L 250 380 L 230 370 L 280 280"/>
+    <!-- Back leg (straight) -->
+    <path d="M 345 280 L 420 340 L 430 320 L 350 270"/>
+    <!-- Front arm (extended) -->
+    <path d="M 295 200 L 200 160 L 195 175 L 290 215"/>
+    <!-- Back arm -->
+    <path d="M 345 200 L 380 250 L 370 260 L 340 215"/>
+  </g>
+  
+  <!-- Accent ring -->
+  <circle cx="256" cy="256" r="230" fill="none" stroke="url(#sword)" stroke-width="4" opacity="0.5"/>
+</svg>

@@ -1,0 +1,508 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		001 /* LittleFencerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 101; };
+		002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102; };
+		003 /* MainTrainingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 103; };
+		004 /* SkeletonOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 104; };
+		005 /* GalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105; };
+		006 /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 106; };
+		007 /* PoseDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 107; };
+		008 /* FencingStateEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 108; };
+		009 /* AudioFeedbackManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109; };
+		010 /* VideoRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 110; };
+		011 /* VideoRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 111; };
+		012 /* GeometryUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 112; };
+		013 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 113; };
+		014 /* ActionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120; };
+		015 /* ActionDetectorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 121; };
+		016 /* AdvanceDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 130; };
+		017 /* RetreatDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 131; };
+		018 /* LungeDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 132; };
+		019 /* AdvanceLungeDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 133; };
+		020 /* BalestraLungeDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 134; };
+		021 /* FlungeDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 135; };
+		022 /* ParryRiposteDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		100 /* LittleFencer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LittleFencer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		101 /* LittleFencerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LittleFencerApp.swift; sourceTree = "<group>"; };
+		102 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		103 /* MainTrainingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTrainingView.swift; sourceTree = "<group>"; };
+		104 /* SkeletonOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkeletonOverlayView.swift; sourceTree = "<group>"; };
+		105 /* GalleryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GalleryView.swift; sourceTree = "<group>"; };
+		106 /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
+		107 /* PoseDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseDetector.swift; sourceTree = "<group>"; };
+		108 /* FencingStateEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FencingStateEngine.swift; sourceTree = "<group>"; };
+		109 /* AudioFeedbackManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFeedbackManager.swift; sourceTree = "<group>"; };
+		110 /* VideoRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRecorder.swift; sourceTree = "<group>"; };
+		111 /* VideoRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRepository.swift; sourceTree = "<group>"; };
+		112 /* GeometryUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeometryUtils.swift; sourceTree = "<group>"; };
+		113 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		114 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		120 /* ActionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionModels.swift; sourceTree = "<group>"; };
+		121 /* ActionDetectorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionDetectorManager.swift; sourceTree = "<group>"; };
+		130 /* AdvanceDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvanceDetector.swift; sourceTree = "<group>"; };
+		131 /* RetreatDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RetreatDetector.swift; sourceTree = "<group>"; };
+		132 /* LungeDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LungeDetector.swift; sourceTree = "<group>"; };
+		133 /* AdvanceLungeDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvanceLungeDetector.swift; sourceTree = "<group>"; };
+		134 /* BalestraLungeDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalestraLungeDetector.swift; sourceTree = "<group>"; };
+		135 /* FlungeDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlungeDetector.swift; sourceTree = "<group>"; };
+		136 /* ParryRiposteDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParryRiposteDetector.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		200 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		300 = {
+			isa = PBXGroup;
+			children = (
+				301 /* LittleFencer */,
+				302 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		301 /* LittleFencer */ = {
+			isa = PBXGroup;
+			children = (
+				310 /* App */,
+				311 /* Views */,
+				312 /* Camera */,
+				313 /* Pose */,
+				314 /* Logic */,
+				315 /* Feedback */,
+				316 /* Recorder */,
+				317 /* Gallery */,
+				318 /* Utils */,
+				319 /* Resources */,
+				114 /* Info.plist */,
+			);
+			path = LittleFencer;
+			sourceTree = "<group>";
+		};
+		302 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				100 /* LittleFencer.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		310 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				101 /* LittleFencerApp.swift */,
+				102 /* ContentView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		311 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				103 /* MainTrainingView.swift */,
+				104 /* SkeletonOverlayView.swift */,
+				105 /* GalleryView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		312 /* Camera */ = {
+			isa = PBXGroup;
+			children = (
+				106 /* CameraManager.swift */,
+			);
+			path = Camera;
+			sourceTree = "<group>";
+		};
+		313 /* Pose */ = {
+			isa = PBXGroup;
+			children = (
+				107 /* PoseDetector.swift */,
+			);
+			path = Pose;
+			sourceTree = "<group>";
+		};
+		314 /* Logic */ = {
+			isa = PBXGroup;
+			children = (
+				108 /* FencingStateEngine.swift */,
+				120 /* ActionModels.swift */,
+				121 /* ActionDetectorManager.swift */,
+				320 /* Detectors */,
+			);
+			path = Logic;
+			sourceTree = "<group>";
+		};
+		315 /* Feedback */ = {
+			isa = PBXGroup;
+			children = (
+				109 /* AudioFeedbackManager.swift */,
+			);
+			path = Feedback;
+			sourceTree = "<group>";
+		};
+		316 /* Recorder */ = {
+			isa = PBXGroup;
+			children = (
+				110 /* VideoRecorder.swift */,
+			);
+			path = Recorder;
+			sourceTree = "<group>";
+		};
+		317 /* Gallery */ = {
+			isa = PBXGroup;
+			children = (
+				111 /* VideoRepository.swift */,
+			);
+			path = Gallery;
+			sourceTree = "<group>";
+		};
+		318 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				112 /* GeometryUtils.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		319 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				113 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		320 /* Detectors */ = {
+			isa = PBXGroup;
+			children = (
+				130 /* AdvanceDetector.swift */,
+				131 /* RetreatDetector.swift */,
+				132 /* LungeDetector.swift */,
+				133 /* AdvanceLungeDetector.swift */,
+				134 /* BalestraLungeDetector.swift */,
+				135 /* FlungeDetector.swift */,
+				136 /* ParryRiposteDetector.swift */,
+			);
+			path = Detectors;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		400 /* LittleFencer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 500;
+			buildPhases = (
+				401 /* Sources */,
+				200 /* Frameworks */,
+				402 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LittleFencer;
+			productName = LittleFencer;
+			productReference = 100 /* LittleFencer.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		600 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					400 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = 601;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+				"zh-Hans",
+			);
+			mainGroup = 300;
+			productRefGroup = 302 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				400 /* LittleFencer */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		402 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				013 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		401 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				001 /* LittleFencerApp.swift in Sources */,
+				002 /* ContentView.swift in Sources */,
+				003 /* MainTrainingView.swift in Sources */,
+				004 /* SkeletonOverlayView.swift in Sources */,
+				005 /* GalleryView.swift in Sources */,
+				006 /* CameraManager.swift in Sources */,
+				007 /* PoseDetector.swift in Sources */,
+				008 /* FencingStateEngine.swift in Sources */,
+				009 /* AudioFeedbackManager.swift in Sources */,
+				010 /* VideoRecorder.swift in Sources */,
+				011 /* VideoRepository.swift in Sources */,
+				012 /* GeometryUtils.swift in Sources */,
+				014 /* ActionModels.swift in Sources */,
+				015 /* ActionDetectorManager.swift in Sources */,
+				016 /* AdvanceDetector.swift in Sources */,
+				017 /* RetreatDetector.swift in Sources */,
+				018 /* LungeDetector.swift in Sources */,
+				019 /* AdvanceLungeDetector.swift in Sources */,
+				020 /* BalestraLungeDetector.swift in Sources */,
+				021 /* FlungeDetector.swift in Sources */,
+				022 /* ParryRiposteDetector.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		700 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		701 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		702 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LittleFencer/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = LittleFencer;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.littlefencer.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		703 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LittleFencer/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = LittleFencer;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.littlefencer.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		500 /* Build configuration list for PBXNativeTarget "LittleFencer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				702 /* Debug */,
+				703 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		601 /* Build configuration list for PBXProject "LittleFencer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				700 /* Debug */,
+				701 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 600 /* Project object */;
+}
