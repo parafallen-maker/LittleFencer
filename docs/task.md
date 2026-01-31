@@ -32,6 +32,18 @@
 - **Lunge 动作检测**: 7项检查 (手臂先行, 后腿蹬直, 膝不超踝, 前膝稳定, 躯干直立, 头部位置, 剑尖水平)
 - **新增教练语音**: Push back leg, Stay upright, Head up, Blade level, Wider stance 等
 
+### P2.1 全佩剑动作检测 🚧 进行中
+- [x] `ActionModels.kt` - 核心数据模型和接口
+- [x] `AdvanceDetector.kt` - 前进步检测
+- [x] `RetreatDetector.kt` - 后退步检测
+- [x] `AdvanceLungeDetector.kt` - 前进弓步检测
+- [x] `BalestraLungeDetector.kt` - 跳步弓步检测
+- [x] `FlungeDetector.kt` - 飞弓步检测 (含规则合规检查)
+- [x] `ParryRiposteDetector.kt` - 格挡反攻检测 (支持Tierce/Quarte/Quinte)
+- [x] `ActionDetectorManager.kt` - 检测器编排管理
+- [ ] 集成到 `FencingStateEngine`
+- [ ] 更新 `AudioFeedbackManager` 语音
+
 ---
 
 ## Phase 1: The "Mirror" (Foundation)

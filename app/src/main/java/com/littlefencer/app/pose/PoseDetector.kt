@@ -18,14 +18,27 @@ import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarkerResult
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
+/**
+ * GPU acceleration configuration
+ */
+enum class GpuAccelerationMode {
+    AUTO,       // Try GPU first, fallback to CPU (default)
+    GPU_ONLY,   // Force GPU, fail if unavailable
+    CPU_ONLY    // Force CPU only
+}
+
 class PoseDetector(
     private val context: Context,
     private val resultListener: (PoseLandmarkerResult) -> Unit,
     private val errorListener: (String) -> Unit = {},
-    private val frameListener: ((Bitmap, Long) -> Unit)? = null  // P1: For pre-padding buffer
+    private val frameListener: ((Bitmap, Long) -> Unit)? = null,  // P1: For pre-padding buffer
+    private val gpuMode: GpuAccelerationMode = GpuAccelerationMode.AUTO,
+    private val onDelegateInitialized: ((isGpuEnabled: Boolean) -> Unit)? = null
 ) : ImageAnalysis.Analyzer {
 
     private var poseLandmarker: PoseLandmarker? = null
+    private var isGpuEnabled: Boolean = false
+    
     // Background executor for MediaPipe setup (optional if lightweight, but good practice)
     private val backgroundExecutor: ExecutorService = Executors.newSingleThreadExecutor()
 
@@ -35,15 +48,50 @@ class PoseDetector(
             setupPoseLandmarker()
         }
     }
+    
+    /**
+     * Check if GPU acceleration is currently active
+     */
+    fun isUsingGpu(): Boolean = isGpuEnabled
 
     private fun setupPoseLandmarker() {
-        // Try GPU first, fallback to CPU if GPU fails
-        if (!tryCreateWithDelegate(Delegate.GPU)) {
-            Log.w(TAG, "GPU delegate failed, falling back to CPU")
-            if (!tryCreateWithDelegate(Delegate.CPU)) {
-                errorListener("MediaPipe failed to initialize on both GPU and CPU")
+        when (gpuMode) {
+            GpuAccelerationMode.AUTO -> {
+                // Try GPU first, fallback to CPU if GPU fails
+                if (tryCreateWithDelegate(Delegate.GPU)) {
+                    isGpuEnabled = true
+                    Log.i(TAG, "✅ GPU acceleration enabled")
+                } else {
+                    Log.w(TAG, "GPU delegate failed, falling back to CPU")
+                    if (tryCreateWithDelegate(Delegate.CPU)) {
+                        isGpuEnabled = false
+                        Log.i(TAG, "📍 Running on CPU")
+                    } else {
+                        errorListener("MediaPipe failed to initialize on both GPU and CPU")
+                        return
+                    }
+                }
+            }
+            GpuAccelerationMode.GPU_ONLY -> {
+                if (tryCreateWithDelegate(Delegate.GPU)) {
+                    isGpuEnabled = true
+                    Log.i(TAG, "✅ GPU acceleration enabled (forced)")
+                } else {
+                    errorListener("GPU acceleration required but unavailable")
+                    return
+                }
+            }
+            GpuAccelerationMode.CPU_ONLY -> {
+                if (tryCreateWithDelegate(Delegate.CPU)) {
+                    isGpuEnabled = false
+                    Log.i(TAG, "📍 Running on CPU (forced)")
+                } else {
+                    errorListener("CPU delegate initialization failed")
+                    return
+                }
             }
         }
+        onDelegateInitialized?.invoke(isGpuEnabled)
     }
 
     private fun tryCreateWithDelegate(delegate: Delegate): Boolean {

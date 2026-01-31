@@ -52,6 +52,14 @@ class AudioFeedbackManager(private val context: Context) {
         const val PHRASE_KNEE_OVER_ANKLE = "Knee forward!"
         const val PHRASE_WIDER_STANCE = "Wider stance!"
         const val PHRASE_FASTER_RECOVERY = "Faster recovery!"
+        
+        // P2.1 New Action Phrases
+        const val PHRASE_NICE_ADVANCE = "Good advance!"
+        const val PHRASE_NICE_RETREAT = "Good retreat!"
+        const val PHRASE_NICE_PARRY = "Good parry!"
+        const val PHRASE_NICE_RIPOSTE = "Nice riposte!"
+        const val PHRASE_FLUNGE_ALERT = "Flunge!"
+        const val PHRASE_RULE_VIOLATION = "Back foot passed!"
     }
 
     /**
