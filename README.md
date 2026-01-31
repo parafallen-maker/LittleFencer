@@ -6,16 +6,18 @@
   <img src="docs/banner.png" alt="LittleFencer Banner" width="600">
 </p>
 
-[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS-blue.svg)](/)
+[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web%20%7C%20WeChat-blue.svg)](/)
 [![Android](https://img.shields.io/badge/Android-12%2B-green.svg)](/)
 [![iOS](https://img.shields.io/badge/iOS-15%2B-lightgrey.svg)](/)
+[![Web](https://img.shields.io/badge/Web-PWA-purple.svg)](/)
+[![WeChat](https://img.shields.io/badge/WeChat-MiniProgram-brightgreen.svg)](/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## 📖 简介
 
 LittleFencer 是一款基于 AI 姿态识别的青少年佩剑（Saber）训练辅助 App。通过手机摄像头实时分析训练者的动作姿态，提供即时的语音和视觉反馈，帮助青少年击剑爱好者在家中进行科学、有效的基础动作训练。
 
-**支持 Android 和 iOS 双平台！**
+**🎉 全平台支持：Android、iOS、Web PWA、微信小程序！**
 
 ### ✨ 核心特性
 
@@ -59,6 +61,15 @@ LittleFencer 是一款基于 AI 姿态识别的青少年佩剑（Saber）训练�
 
 ## 🛠️ 技术栈
 
+### 平台支持
+
+| 平台 | 定位 | 状态 |
+|------|------|------|
+| **Android** | 主力训练平台 | ✅ 完成 |
+| **iOS** | 主力训练平台 | ✅ 完成 |
+| **Web PWA** | 跨平台轻量版 | ✅ 完成 |
+| **微信小程序** | 社交裂变入口 | 🚧 开发中 |
+
 ### Android
 
 | 组件 | 技术 |
@@ -80,6 +91,27 @@ LittleFencer 是一款基于 AI 姿态识别的青少年佩剑（Saber）训练�
 | **相机** | AVFoundation |
 | **AI 姿态** | Vision Framework (VNDetectHumanBodyPoseRequest) |
 | **音频** | AVSpeechSynthesizer |
+
+### Web PWA
+
+| 组件 | 技术 |
+|------|------|
+| **框架** | 原生 JavaScript (ES Modules) |
+| **相机** | getUserMedia API |
+| **AI 姿态** | MediaPipe Pose (CDN) |
+| **存储** | IndexedDB |
+| **离线** | Service Worker |
+| **分享** | Web Share API |
+
+### 微信小程序
+
+| 组件 | 技术 |
+|------|------|
+| **框架** | 微信原生 |
+| **相机** | Camera 组件 |
+| **AI 姿态** | Vision Kit |
+| **存储** | 云开发 |
+| **分享** | 原生分享能力 |
 
 ## 📁 项目结构
 
@@ -112,6 +144,33 @@ LittleFencer-iOS/                # iOS 项目 (同级目录)
     │   └── Detectors/           # 7种动作检测器
     ├── Feedback/AudioFeedbackManager.swift
     └── Recorder/VideoRecorder.swift
+
+LittleFencer-Web/                # Web PWA 项目 (同级目录)
+├── index.html                   # 主入口
+├── manifest.json                # PWA 配置
+├── sw.js                        # Service Worker
+├── css/style.css                # 样式
+└── js/
+    ├── app.js                   # 主应用
+    ├── camera.js                # 相机管理
+    ├── pose.js                  # MediaPipe 姿态检测
+    ├── engine.js                # 击剑状态机
+    ├── feedback.js              # 音频反馈
+    ├── recorder.js              # 视频录制
+    ├── storage.js               # IndexedDB 存储
+    ├── platform.js              # iOS 兼容性
+    └── detectors/               # 动作检测器
+
+LittleFencer-MiniProgram/        # 微信小程序 (同级目录)
+├── app.js                       # 小程序入口
+├── app.json                     # 配置
+├── pages/
+│   ├── index/                   # 首页
+│   ├── training/                # 训练页
+│   ├── gallery/                 # 视频画廊
+│   ├── challenge/               # 好友挑战
+│   └── rank/                    # 排行榜
+└── components/                  # 自定义组件
 ```
 
 ## 🚀 快速开始
@@ -158,6 +217,35 @@ open LittleFencer.xcodeproj
 xcodebuild -scheme LittleFencer -sdk iphoneos build
 ```
 
+### Web PWA
+
+```bash
+# Web PWA 项目在同级目录
+cd ../LittleFencer-Web
+
+# 启动本地服务器
+python3 -m http.server 8080
+
+# 浏览器访问
+open http://localhost:8080
+```
+
+> 💡 Web PWA 支持添加到主屏幕，可离线使用
+
+### 微信小程序
+
+```bash
+# 小程序项目在同级目录
+cd ../LittleFencer-MiniProgram
+
+# 用微信开发者工具打开项目
+# 1. 填写 AppID
+# 2. 配置云开发环境
+# 3. 编译预览
+```
+
+详细文档：[小程序开发指南](LittleFencer-MiniProgram/README.md)
+
 ### 权限说明
 
 #### Android
@@ -191,7 +279,13 @@ xcodebuild -scheme LittleFencer -sdk iphoneos build
 
 MIT License - 详见 [LICENSE](LICENSE) 文件
 
-## 🙏 致谢
+## � 相关文档
+
+- [Android PRD](docs/prd.md) - Android 版产品需求文档
+- [微信小程序 PRD](docs/prd-miniprogram.md) - 小程序版产品需求文档
+- [小程序开发任务](docs/todos-miniprogram.md) - 小程序开发任务清单
+
+## �🙏 致谢
 
 - [MediaPipe](https://developers.google.com/mediapipe) - Google 的跨平台 ML 框架
 - [CameraX](https://developer.android.com/training/camerax) - Jetpack 相机库
