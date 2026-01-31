@@ -1,0 +1,6 @@
+<view class="container">
+  <view class="empty-state">
+    <text class="empty-icon">🚧</text>
+    <text class="empty-text">开发中...</text>
+  </view>
+</view>

@@ -1,0 +1,103 @@
+<!--
+  训练页面 - LittleFencer 小程序
+-->
+<view class="training-container">
+  <!-- 相机区域 -->
+  <view class="camera-wrapper">
+    <camera 
+      class="camera"
+      device-position="{{cameraPosition}}"
+      flash="off"
+      frame-size="medium"
+      bindinitdone="onCameraReady"
+      binderror="onCameraError"
+    ></camera>
+    
+    <!-- 骨骼覆盖层 -->
+    <canvas 
+      wx:if="{{skeletonVisible && skeletonPoints.length > 0}}"
+      class="skeleton-canvas"
+      type="2d"
+      id="skeleton-canvas"
+    ></canvas>
+    
+    <!-- 相机错误提示 -->
+    <view class="camera-error" wx:if="{{cameraError}}">
+      <text class="error-icon">📷</text>
+      <text class="error-text">{{cameraError}}</text>
+      <button class="btn btn-primary" bindtap="initCamera">重试</button>
+    </view>
+  </view>
+
+  <!-- 状态指示器 -->
+  <view class="status-overlay">
+    <view class="status-badge {{currentState}}">
+      <text class="status-icon">{{currentState === 'engarde' ? '⚔️' : currentState === 'lunge' ? '🎯' : '🔄'}}</text>
+      <text class="status-text">{{stateText}}</text>
+    </view>
+  </view>
+
+  <!-- 反馈提示 -->
+  <view class="feedback-toast {{feedbackType}}" wx:if="{{feedbackText}}">
+    <text>{{feedbackText}}</text>
+  </view>
+
+  <!-- Combo 计数器 -->
+  <view class="combo-container" wx:if="{{comboCount > 0}}">
+    <text class="combo-count">{{comboCount}}</text>
+    <text class="combo-label">COMBO</text>
+  </view>
+
+  <!-- 录制指示器 -->
+  <view class="recording-indicator" wx:if="{{isRecording}}">
+    <view class="recording-dot"></view>
+    <text class="recording-text">{{recordingDuration}}s</text>
+  </view>
+
+  <!-- 统计信息栏 -->
+  <view class="stats-bar">
+    <view class="stat-item">
+      <text class="stat-value">{{actionCount}}</text>
+      <text class="stat-label">动作</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-value">{{perfectCount}}</text>
+      <text class="stat-label">完美</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-value">{{maxCombo}}</text>
+      <text class="stat-label">最高连击</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-value">{{sessionDuration}}s</text>
+      <text class="stat-label">时长</text>
+    </view>
+  </view>
+
+  <!-- 控制栏 -->
+  <view class="controls-bar">
+    <!-- 切换摄像头 -->
+    <button class="control-btn" bindtap="onFlipCamera">
+      <text class="btn-icon">🔄</text>
+      <text class="btn-label">翻转</text>
+    </button>
+    
+    <!-- 录制按钮 -->
+    <button class="control-btn {{isRecording ? 'recording' : ''}}" bindtap="onToggleRecording">
+      <text class="btn-icon">{{isRecording ? '⏹️' : '⏺️'}}</text>
+      <text class="btn-label">{{isRecording ? '停止' : '录制'}}</text>
+    </button>
+    
+    <!-- 开始/停止训练 -->
+    <button class="control-btn primary {{isTraining ? 'active' : ''}}" bindtap="onToggleTraining">
+      <text class="btn-icon">{{isTraining ? '⏹️' : '▶️'}}</text>
+      <text class="btn-label">{{isTraining ? '停止' : '开始'}}</text>
+    </button>
+    
+    <!-- 骨骼显示 -->
+    <button class="control-btn" bindtap="onToggleSkeleton">
+      <text class="btn-icon">🦴</text>
+      <text class="btn-label">{{skeletonVisible ? '隐藏' : '显示'}}</text>
+    </button>
+  </view>
+</view>

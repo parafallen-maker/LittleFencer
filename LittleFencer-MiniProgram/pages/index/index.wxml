@@ -1,0 +1,91 @@
+<!--
+  首页 - LittleFencer 小程序
+-->
+<view class="container">
+  <!-- 用户信息区 -->
+  <view class="user-section card">
+    <block wx:if="{{isLoggedIn}}">
+      <view class="user-info">
+        <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+        <view class="user-text">
+          <text class="nickname">{{userInfo.nickName}}</text>
+          <text class="greeting">今天也要加油训练哦！</text>
+        </view>
+      </view>
+    </block>
+    <block wx:else>
+      <view class="login-prompt">
+        <text class="login-text">登录后可保存训练记录</text>
+        <button class="btn btn-primary" bindtap="onLogin">微信登录</button>
+      </view>
+    </block>
+  </view>
+
+  <!-- 今日统计 -->
+  <view class="stats-section card">
+    <view class="card-title">📊 今日训练</view>
+    <view class="stats-row">
+      <view class="stat-item">
+        <text class="stat-value">{{todayStats.actionCount}}</text>
+        <text class="stat-label">动作数</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{todayStats.perfectCount}}</text>
+        <text class="stat-label">完美</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{todayStats.maxCombo}}</text>
+        <text class="stat-label">最高连击</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{todayStats.trainingTime}}</text>
+        <text class="stat-label">分钟</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 每日挑战 -->
+  <view class="challenge-section card" wx:if="{{dailyChallenge}}">
+    <view class="card-title">🎯 每日挑战</view>
+    <view class="challenge-content">
+      <text class="challenge-title">{{dailyChallenge.title}}</text>
+      <view class="progress-bar">
+        <view class="progress-fill" style="width: {{dailyChallenge.progress / dailyChallenge.total * 100}}%"></view>
+      </view>
+      <view class="challenge-meta">
+        <text class="progress-text">{{dailyChallenge.progress}}/{{dailyChallenge.total}}</text>
+        <text class="reward-text">奖励: {{dailyChallenge.reward}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 开始训练大按钮 -->
+  <view class="start-section">
+    <button class="start-btn" bindtap="onStartTraining">
+      <text class="start-icon">⚔️</text>
+      <text class="start-text">开始训练</text>
+    </button>
+  </view>
+
+  <!-- 快捷入口 -->
+  <view class="quick-actions">
+    <view 
+      class="action-item card" 
+      wx:for="{{quickActions}}" 
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="onQuickAction"
+    >
+      <text class="action-icon">{{item.icon}}</text>
+      <view class="action-text">
+        <text class="action-title">{{item.title}}</text>
+        <text class="action-desc">{{item.desc}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部提示 -->
+  <view class="footer-tip">
+    <text>💡 提示：将手机横放可获得更好的训练体验</text>
+  </view>
+</view>

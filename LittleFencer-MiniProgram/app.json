@@ -1,0 +1,74 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/training/training",
+    "pages/gallery/gallery",
+    "pages/challenge/challenge",
+    "pages/rank/rank",
+    "pages/profile/profile"
+  ],
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#1a1a2e",
+    "navigationBarTitleText": "LittleFencer",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#0f0f1a"
+  },
+  "tabBar": {
+    "color": "#8e8ea0",
+    "selectedColor": "#00d4aa",
+    "backgroundColor": "#1a1a2e",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "assets/icons/tab_home.png",
+        "selectedIconPath": "assets/icons/tab_home_active.png"
+      },
+      {
+        "pagePath": "pages/training/training",
+        "text": "训练",
+        "iconPath": "assets/icons/tab_training.png",
+        "selectedIconPath": "assets/icons/tab_training_active.png"
+      },
+      {
+        "pagePath": "pages/gallery/gallery",
+        "text": "视频",
+        "iconPath": "assets/icons/tab_video.png",
+        "selectedIconPath": "assets/icons/tab_video_active.png"
+      },
+      {
+        "pagePath": "pages/rank/rank",
+        "text": "排行",
+        "iconPath": "assets/icons/tab_rank.png",
+        "selectedIconPath": "assets/icons/tab_rank_active.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "assets/icons/tab_profile.png",
+        "selectedIconPath": "assets/icons/tab_profile_active.png"
+      }
+    ]
+  },
+  "requiredPrivateInfos": [
+    "chooseImage",
+    "chooseVideo"
+  ],
+  "permission": {
+    "scope.camera": {
+      "desc": "用于拍摄训练视频和姿态检测"
+    },
+    "scope.writePhotosAlbum": {
+      "desc": "用于保存训练视频到相册"
+    },
+    "scope.record": {
+      "desc": "用于录制训练视频"
+    }
+  },
+  "usingComponents": {},
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents",
+  "style": "v2"
+}

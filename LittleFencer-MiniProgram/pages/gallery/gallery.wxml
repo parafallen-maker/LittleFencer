@@ -1,0 +1,101 @@
+<!--
+  视频画廊页面 - LittleFencer 小程序
+-->
+<view class="container">
+  <!-- 筛选栏 -->
+  <view class="filter-bar">
+    <view 
+      class="filter-item {{currentFilter === 'all' ? 'active' : ''}}"
+      data-filter="all"
+      bindtap="onFilterChange"
+    >📹 全部</view>
+    <view 
+      class="filter-item {{currentFilter === 'starred' ? 'active' : ''}}"
+      data-filter="starred"
+      bindtap="onFilterChange"
+    >⭐ 精彩</view>
+    <view 
+      class="filter-item {{currentFilter === 'recent' ? 'active' : ''}}"
+      data-filter="recent"
+      bindtap="onFilterChange"
+    >🕐 最近</view>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="loading" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text>加载中...</text>
+  </view>
+
+  <!-- 视频列表 -->
+  <view class="video-grid" wx:elif="{{videos.length > 0}}">
+    <view 
+      class="video-item"
+      wx:for="{{videos}}"
+      wx:key="_id"
+      data-video="{{item}}"
+      bindtap="onPlayVideo"
+    >
+      <!-- 视频封面 -->
+      <view class="video-cover">
+        <image 
+          class="cover-image" 
+          src="{{item.coverUrl || '/assets/images/video_placeholder.png'}}"
+          mode="aspectFill"
+        ></image>
+        <view class="play-icon">▶️</view>
+        <view class="duration-badge">{{item.duration}}s</view>
+      </view>
+      
+      <!-- 视频信息 -->
+      <view class="video-info">
+        <view class="video-stats">
+          <text>🎯 {{item.actionCount || 0}}</text>
+          <text>⭐ {{item.perfectCount || 0}}</text>
+          <text>🔥 {{item.maxCombo || 0}}</text>
+        </view>
+        <view class="video-date">{{item.createTime}}</view>
+      </view>
+      
+      <!-- 操作按钮 -->
+      <view class="video-actions" catchtap="stopPropagation">
+        <button class="action-btn" data-video="{{item}}" catchtap="onShareVideo">📤</button>
+        <button class="action-btn" data-video="{{item}}" catchtap="onSaveToAlbum">💾</button>
+        <button class="action-btn danger" data-video="{{item}}" catchtap="onDeleteVideo">🗑️</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:else>
+    <text class="empty-icon">📹</text>
+    <text class="empty-text">还没有训练视频</text>
+    <text class="empty-hint">去训练页面录制你的第一个视频吧！</text>
+    <navigator class="btn btn-primary mt-md" url="/pages/training/training" open-type="switchTab">
+      开始训练
+    </navigator>
+  </view>
+
+  <!-- 视频播放器弹窗 -->
+  <view class="player-modal" wx:if="{{showPlayer}}" bindtap="onClosePlayer">
+    <view class="player-content" catchtap="stopPropagation">
+      <video 
+        class="player-video"
+        src="{{currentVideo.fileID}}"
+        controls
+        autoplay
+        show-fullscreen-btn
+        show-play-btn
+        enable-progress-gesture
+      ></video>
+      <view class="player-info">
+        <view class="player-stats">
+          <text>动作: {{currentVideo.actionCount || 0}}</text>
+          <text>完美: {{currentVideo.perfectCount || 0}}</text>
+          <text>连击: {{currentVideo.maxCombo || 0}}</text>
+        </view>
+      </view>
+      <button class="close-btn" bindtap="onClosePlayer">✕</button>
+    </view>
+  </view>
+</view>

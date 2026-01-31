@@ -1,0 +1,175 @@
+/**
+ * 首页样式
+ */
+
+/* 用户区域 */
+.user-section {
+  margin-bottom: 24rpx;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.avatar {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  border: 4rpx solid var(--primary);
+}
+
+.user-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.nickname {
+  font-size: 34rpx;
+  font-weight: 600;
+}
+
+.greeting {
+  font-size: 26rpx;
+  color: var(--text-muted);
+  margin-top: 8rpx;
+}
+
+.login-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.login-text {
+  color: var(--text-muted);
+  font-size: 28rpx;
+}
+
+/* 统计区域 */
+.stats-section .stats-row {
+  margin-top: 16rpx;
+}
+
+/* 每日挑战 */
+.challenge-content {
+  padding: 16rpx 0;
+}
+
+.challenge-title {
+  font-size: 30rpx;
+  font-weight: 500;
+}
+
+.progress-bar {
+  height: 16rpx;
+  background: var(--bg-input);
+  border-radius: 8rpx;
+  margin: 20rpx 0;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  border-radius: 8rpx;
+  transition: width 0.3s ease;
+}
+
+.challenge-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 24rpx;
+  color: var(--text-muted);
+}
+
+.reward-text {
+  color: var(--accent);
+}
+
+/* 开始训练按钮 */
+.start-section {
+  padding: 40rpx 0;
+}
+
+.start-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 280rpx;
+  height: 280rpx;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  box-shadow: 0 10rpx 40rpx rgba(0, 212, 170, 0.4);
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.start-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 5rpx 20rpx rgba(0, 212, 170, 0.3);
+}
+
+.start-icon {
+  font-size: 80rpx;
+}
+
+.start-text {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #000;
+  margin-top: 12rpx;
+}
+
+/* 快捷入口 */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+  margin-top: 20rpx;
+}
+
+.action-item {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding: 24rpx;
+  transition: all 0.2s ease;
+}
+
+.action-item:active {
+  transform: scale(0.98);
+  background: var(--secondary);
+}
+
+.action-icon {
+  font-size: 48rpx;
+}
+
+.action-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.action-title {
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.action-desc {
+  font-size: 22rpx;
+  color: var(--text-muted);
+  margin-top: 4rpx;
+}
+
+/* 底部提示 */
+.footer-tip {
+  text-align: center;
+  padding: 40rpx 20rpx;
+  color: var(--text-muted);
+  font-size: 24rpx;
+}

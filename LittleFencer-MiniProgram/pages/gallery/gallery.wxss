@@ -1,0 +1,171 @@
+/**
+ * 视频画廊页面样式
+ */
+
+/* 筛选栏 */
+.filter-bar {
+  display: flex;
+  gap: 16rpx;
+  margin-bottom: 30rpx;
+}
+
+.filter-item {
+  flex: 1;
+  padding: 20rpx;
+  text-align: center;
+  background: var(--bg-card);
+  border-radius: 16rpx;
+  font-size: 26rpx;
+  color: var(--text-muted);
+  border: 2rpx solid var(--border);
+  transition: all 0.2s ease;
+}
+
+.filter-item.active {
+  background: var(--primary);
+  color: #000;
+  border-color: var(--primary);
+  font-weight: 600;
+}
+
+/* 视频网格 */
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+}
+
+.video-item {
+  background: var(--bg-card);
+  border-radius: 16rpx;
+  overflow: hidden;
+  border: 1rpx solid var(--border);
+  transition: transform 0.2s ease;
+}
+
+.video-item:active {
+  transform: scale(0.98);
+}
+
+/* 视频封面 */
+.video-cover {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: var(--secondary);
+}
+
+.cover-image {
+  width: 100%;
+  height: 100%;
+}
+
+.play-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 60rpx;
+  opacity: 0.8;
+}
+
+.duration-badge {
+  position: absolute;
+  bottom: 10rpx;
+  right: 10rpx;
+  padding: 4rpx 12rpx;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 8rpx;
+  font-size: 22rpx;
+  color: #fff;
+}
+
+/* 视频信息 */
+.video-info {
+  padding: 16rpx;
+}
+
+.video-stats {
+  display: flex;
+  gap: 16rpx;
+  font-size: 24rpx;
+  color: var(--text-muted);
+}
+
+.video-date {
+  font-size: 22rpx;
+  color: var(--text-muted);
+  margin-top: 8rpx;
+  opacity: 0.7;
+}
+
+/* 操作按钮 */
+.video-actions {
+  display: flex;
+  justify-content: space-around;
+  padding: 12rpx;
+  border-top: 1rpx solid var(--border);
+}
+
+.action-btn {
+  padding: 8rpx 20rpx;
+  background: transparent;
+  border: none;
+  font-size: 28rpx;
+}
+
+.action-btn.danger {
+  color: var(--danger);
+}
+
+/* 播放器弹窗 */
+.player-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.player-content {
+  position: relative;
+  width: 90%;
+  max-width: 700rpx;
+  background: var(--bg-card);
+  border-radius: 20rpx;
+  overflow: hidden;
+}
+
+.player-video {
+  width: 100%;
+  height: 420rpx;
+}
+
+.player-info {
+  padding: 20rpx;
+}
+
+.player-stats {
+  display: flex;
+  justify-content: space-around;
+  font-size: 26rpx;
+  color: var(--text-muted);
+}
+
+.close-btn {
+  position: absolute;
+  top: -60rpx;
+  right: 0;
+  width: 60rpx;
+  height: 60rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  font-size: 32rpx;
+  color: #fff;
+}

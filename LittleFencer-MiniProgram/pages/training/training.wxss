@@ -1,0 +1,278 @@
+/**
+ * 训练页面样式
+ */
+
+.training-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background: #000;
+  overflow: hidden;
+}
+
+/* 相机区域 */
+.camera-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.camera {
+  width: 100%;
+  height: 100%;
+}
+
+.skeleton-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.camera-error {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20rpx;
+  padding: 40rpx;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 20rpx;
+}
+
+.error-icon {
+  font-size: 80rpx;
+}
+
+.error-text {
+  color: var(--text-muted);
+  font-size: 28rpx;
+}
+
+/* 状态指示器 */
+.status-overlay {
+  position: absolute;
+  top: 60rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 16rpx 32rpx;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 40rpx;
+  border: 2rpx solid var(--border);
+}
+
+.status-badge.engarde {
+  border-color: var(--success);
+  background: rgba(0, 212, 170, 0.2);
+}
+
+.status-badge.lunge {
+  border-color: var(--accent);
+  background: rgba(255, 215, 0, 0.2);
+}
+
+.status-icon {
+  font-size: 36rpx;
+}
+
+.status-text {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* 反馈提示 */
+.feedback-toast {
+  position: absolute;
+  top: 180rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 16rpx 40rpx;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 30rpx;
+  font-size: 30rpx;
+  color: var(--text);
+  z-index: 10;
+  animation: fadeInUp 0.3s ease-out;
+}
+
+.feedback-toast.success {
+  background: rgba(0, 212, 170, 0.9);
+  color: #000;
+}
+
+.feedback-toast.error {
+  background: rgba(255, 107, 107, 0.9);
+  color: #fff;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* Combo 计数器 */
+.combo-container {
+  position: absolute;
+  top: 50%;
+  right: 40rpx;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx 30rpx;
+  background: rgba(255, 215, 0, 0.2);
+  border: 3rpx solid var(--accent);
+  border-radius: 20rpx;
+  z-index: 10;
+}
+
+.combo-count {
+  font-size: 80rpx;
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.combo-label {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 2rpx;
+}
+
+/* 录制指示器 */
+.recording-indicator {
+  position: absolute;
+  top: 60rpx;
+  right: 40rpx;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 12rpx 24rpx;
+  background: rgba(255, 0, 0, 0.8);
+  border-radius: 30rpx;
+  z-index: 10;
+}
+
+.recording-dot {
+  width: 16rpx;
+  height: 16rpx;
+  background: #fff;
+  border-radius: 50%;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.recording-text {
+  font-size: 26rpx;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* 统计信息栏 */
+.stats-bar {
+  position: absolute;
+  bottom: 200rpx;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  padding: 20rpx 40rpx;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 10;
+}
+
+.stats-bar .stat-item {
+  text-align: center;
+}
+
+.stats-bar .stat-value {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.stats-bar .stat-label {
+  font-size: 22rpx;
+  color: var(--text-muted);
+}
+
+/* 控制栏 */
+.controls-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 30rpx 20rpx;
+  padding-bottom: calc(30rpx + env(safe-area-inset-bottom));
+  background: rgba(26, 26, 46, 0.95);
+  border-top: 1rpx solid var(--border);
+  z-index: 20;
+}
+
+.control-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  padding: 16rpx 24rpx;
+  background: var(--secondary);
+  border: 2rpx solid var(--border);
+  border-radius: 16rpx;
+  color: var(--text);
+  font-size: 24rpx;
+  min-width: 120rpx;
+}
+
+.control-btn.primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border-color: var(--primary);
+  color: #000;
+}
+
+.control-btn.active {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+
+.control-btn.recording {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+
+.control-btn .btn-icon {
+  font-size: 40rpx;
+}
+
+.control-btn .btn-label {
+  font-size: 22rpx;
+  font-weight: 500;
+}
