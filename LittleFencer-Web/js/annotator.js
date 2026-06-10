@@ -149,10 +149,19 @@ class ActionAnnotator {
         if (this.skeletonFile) {
             try {
                 const text = await this.skeletonFile.text();
-                this.skeletonData = JSON.parse(text);
-                console.log('✅ Skeleton data loaded:', this.skeletonData.skeleton_sequence?.length, 'frames');
+                const parsed = JSON.parse(text);
+                // Imported files are untrusted: only accept the expected shape
+                if (parsed && typeof parsed === 'object' && Array.isArray(parsed.skeleton_sequence)) {
+                    this.skeletonData = parsed;
+                    console.log('✅ Skeleton data loaded:', parsed.skeleton_sequence.length, 'frames');
+                } else {
+                    this.skeletonData = null;
+                    console.error('Invalid skeleton data: missing skeleton_sequence array');
+                    alert('骨骼数据格式不正确（缺少 skeleton_sequence 数组），已忽略');
+                }
             } catch (err) {
                 console.error('Failed to parse skeleton data:', err);
+                alert('骨骼数据解析失败，已忽略');
             }
         }
 
@@ -461,14 +470,20 @@ class ActionAnnotator {
             const li = document.createElement('li');
             li.className = 'annotation-item';
             li.style.borderColor = this.actionColors[ann.action];
+            // Coerce interpolated values: only whitelisted action names and
+            // real numbers may reach innerHTML.
+            const actionName = this.actionNames[ann.action] || '未知动作';
+            const startFrame = Number(ann.start_frame) || 0;
+            const endFrame = Number(ann.end_frame) || 0;
+            const annId = Number(ann.id) || 0;
             li.innerHTML = `
                 <div>
-                    <span class="action-name" style="color: ${this.actionColors[ann.action]}">
-                        ${this.actionNames[ann.action]}
+                    <span class="action-name" style="color: ${this.actionColors[ann.action] || '#999'}">
+                        ${actionName}
                     </span>
-                    <span class="frame-range">帧 ${ann.start_frame} - ${ann.end_frame}</span>
+                    <span class="frame-range">帧 ${startFrame} - ${endFrame}</span>
                 </div>
-                <button class="delete-btn" data-id="${ann.id}">🗑</button>
+                <button class="delete-btn" data-id="${annId}">🗑</button>
             `;
 
             li.querySelector('.delete-btn').addEventListener('click', () => {

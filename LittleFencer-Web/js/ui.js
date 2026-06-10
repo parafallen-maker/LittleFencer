@@ -6,6 +6,7 @@
 
 import { ActionDisplayNames } from './detectors/index.js';
 import { platform } from './platform.js';
+import { safeJsonParse } from './utils.js';
 
 // Badge definitions
 const BADGES = {
@@ -47,7 +48,8 @@ export class UIManager {
         this.hasSeenOnboarding = localStorage.getItem('littlefencer_onboarding_done') === 'true';
 
         // Badge tracking
-        this.earnedBadges = JSON.parse(localStorage.getItem('littlefencer_badges') || '[]');
+        this.earnedBadges = safeJsonParse(localStorage.getItem('littlefencer_badges'), []);
+        if (!Array.isArray(this.earnedBadges)) this.earnedBadges = [];
 
         // iOS install prompt tracking
         this.hasShownIOSInstallPrompt = localStorage.getItem('littlefencer_ios_install_shown') === 'true';

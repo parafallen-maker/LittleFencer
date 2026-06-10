@@ -41,7 +41,9 @@ export class FeatureExtractor {
         );
         const bodyScale = (shoulderWidth + torsoHeight) / 2;
 
-        if (bodyScale === 0) return null;
+        // Guard NaN as well as zero: a NaN scale passes `=== 0` and floods
+        // the whole feature vector with NaN.
+        if (!isFinite(bodyScale) || bodyScale <= 0) return null;
 
         // Extract normalized joint positions relative to hip center
         const hipCenter = this.midpoint(

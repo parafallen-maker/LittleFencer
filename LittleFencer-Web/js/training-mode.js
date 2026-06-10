@@ -598,27 +598,41 @@ class TrainingMode {
     onPoseResults(results) {
         if (!this.isRunning) return;
 
-        // Clear and draw skeleton
-        this.skeleton.clear();
+        // A single bad frame must not take down the whole loop — swallow
+        // per-frame errors, surface once, and keep processing.
+        try {
+            // Clear and draw skeleton
+            this.skeleton.clear();
 
+            if (results.poseLandmarks && this.skeletonVisible) {
+                this.skeleton.render(results.poseLandmarks);
+            }
 
-        if (results.poseLandmarks && this.skeletonVisible) {
-            this.skeleton.render(results.poseLandmarks);
-        }
+            // Process pose with engine
+            const engineResult = this.engine.processPose(
+                results.poseLandmarks,
+                results.poseWorldLandmarks
+            );
 
-        // Process pose with engine
-        const engineResult = this.engine.processPose(
-            results.poseLandmarks,
-            results.poseWorldLandmarks
-        );
+            // Only process if we got valid results
+            if (engineResult) {
+                // Update UI based on state
+                this.handleStateChange(engineResult);
 
-        // Only process if we got valid results
-        if (engineResult) {
-            // Update UI based on state
-            this.handleStateChange(engineResult);
-
-            // Check form and provide feedback
-            this.checkFormAndFeedback(engineResult);
+                // Check form and provide feedback
+                this.checkFormAndFeedback(engineResult);
+            }
+            this.frameErrorCount = 0;
+        } catch (error) {
+            this.frameErrorCount = (this.frameErrorCount || 0) + 1;
+            if (this.frameErrorCount === 1) {
+                console.error('❌ Frame processing error:', error);
+                this.showFeedback('检测出现异常，已自动恢复', 'warning');
+            } else if (this.frameErrorCount >= 90) {
+                console.error('❌ Persistent frame errors, stopping session');
+                this.showFeedback('检测持续异常，请刷新页面', 'error');
+                this.stop();
+            }
         }
     }
 

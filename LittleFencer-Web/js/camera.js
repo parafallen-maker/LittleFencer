@@ -144,11 +144,16 @@ export class CameraManager {
             this.stream.getTracks().forEach(track => track.stop());
             this.stream = null;
         }
-        
+
         if (this.videoElement) {
             this.videoElement.srcObject = null;
+            // Clear handlers set in start() — a later start() assigns fresh
+            // ones, but a stale onloadedmetadata firing in between would
+            // resolve against a dead stream.
+            this.videoElement.onloadedmetadata = null;
+            this.videoElement.onerror = null;
         }
-        
+
         this.isStarted = false;
         console.log('[Camera] Stopped');
     }

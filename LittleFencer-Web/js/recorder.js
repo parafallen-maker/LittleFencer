@@ -18,6 +18,13 @@ export class VideoRecorder {
     async start(stream) {
         if (this.isRecording) return;
 
+        // Graceful degradation: on browsers without MediaRecorder the app
+        // should keep training, just without recording.
+        if (!VideoRecorder.isSupported()) {
+            console.warn('[Recorder] MediaRecorder not supported, recording disabled');
+            return false;
+        }
+
         this.stream = stream;
         this.chunks = [];
 
@@ -25,7 +32,8 @@ export class VideoRecorder {
         const mimeType = this.getSupportedMimeType();
 
         if (!mimeType) {
-            throw new Error('No supported video MIME type found');
+            console.warn('[Recorder] No supported video MIME type, recording disabled');
+            return false;
         }
 
         try {
@@ -49,7 +57,15 @@ export class VideoRecorder {
             this.isRecording = true;
             this.startTime = Date.now();
 
+            // Warn before losing an in-progress recording to a page refresh
+            this._beforeUnload = (e) => {
+                e.preventDefault();
+                e.returnValue = '正在录制训练视频，离开将丢失录像';
+            };
+            window.addEventListener('beforeunload', this._beforeUnload);
+
             console.log('[Recorder] Started recording');
+            return true;
 
         } catch (error) {
             console.error('[Recorder] Failed to start:', error);
@@ -62,6 +78,11 @@ export class VideoRecorder {
      */
     async stop() {
         if (!this.isRecording) return null;
+
+        if (this._beforeUnload) {
+            window.removeEventListener('beforeunload', this._beforeUnload);
+            this._beforeUnload = null;
+        }
 
         return new Promise((resolve) => {
             this.mediaRecorder.onstop = () => {

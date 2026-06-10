@@ -13,6 +13,7 @@ import { UIManager } from './ui.js';
 import { SkeletonRenderer } from './skeleton.js';
 import { platform, requestWakeLock } from './platform.js';
 import { videoStorage } from './storage.js';
+import { safeJsonParse } from './utils.js';
 
 class LittleFencerApp {
     constructor() {
@@ -65,8 +66,16 @@ class LittleFencerApp {
      * Initialize the app
      */
     async init() {
+        // Re-entry guard: a second init() would create duplicate
+        // camera/pose/engine instances and leak the old ones.
+        if (this.isInitialized || this.isInitializing) {
+            console.warn('[App] init() called twice, ignoring');
+            return;
+        }
+        this.isInitializing = true;
+
         console.log('[App] Initializing LittleFencer...');
-        
+
         try {
             // Update loading progress
             this.updateLoadingProgress(10, '初始化界面...');
@@ -132,6 +141,8 @@ class LittleFencerApp {
             console.error('[App] Initialization failed:', error);
             this.updateLoadingProgress(0, `初始化失败: ${error.message}`);
             throw error;
+        } finally {
+            this.isInitializing = false;
         }
     }
     
@@ -304,23 +315,38 @@ class LittleFencerApp {
      */
     handlePoseResults(results) {
         if (!this.isRunning) return;
-        
+
         // Update FPS
         this.frameCount++;
-        
-        // Process pose with engine
-        if (results.poseLandmarks) {
-            this.engine.processPose(results.poseLandmarks, results.poseWorldLandmarks);
-            
-            // Render skeleton
-            if (this.settings.skeletonEnabled) {
-                const quality = this.engine.getCurrentQuality();
-                this.skeleton.render(results.poseLandmarks, quality);
+
+        // A single bad frame must not take down the whole loop — swallow
+        // per-frame errors, surface once, and keep processing.
+        try {
+            if (results.poseLandmarks) {
+                this.engine.processPose(results.poseLandmarks, results.poseWorldLandmarks);
+
+                if (this.settings.skeletonEnabled) {
+                    const quality = this.engine.getCurrentQuality();
+                    this.skeleton.render(results.poseLandmarks, quality);
+                }
+            } else {
+                // No pose detected
+                this.skeleton.clear();
+                this.engine.handleNoPose();
             }
-        } else {
-            // No pose detected
-            this.skeleton.clear();
-            this.engine.handleNoPose();
+            this.frameErrorCount = 0;
+        } catch (error) {
+            this.frameErrorCount = (this.frameErrorCount || 0) + 1;
+            if (this.frameErrorCount === 1) {
+                console.error('[App] Frame processing error:', error);
+                this.ui.showFeedback('检测出现异常，已自动恢复', 'error');
+            } else if (this.frameErrorCount >= 90) {
+                // ~3s of consecutive failures at 30fps: something is
+                // structurally broken, stop instead of spinning.
+                console.error('[App] Persistent frame errors, stopping session');
+                this.ui.showFeedback('检测持续异常，请刷新页面', 'error');
+                this.stop();
+            }
         }
     }
     
@@ -437,8 +463,10 @@ class LittleFencerApp {
         
         try {
             const stream = this.camera.getStream();
-            await this.recorder.start(stream);
-            this.ui.setRecordingState(true);
+            const started = await this.recorder.start(stream);
+            if (started !== false) {
+                this.ui.setRecordingState(true);
+            }
         } catch (error) {
             console.error('[App] Failed to start recording:', error);
         }
@@ -606,11 +634,14 @@ class LittleFencerApp {
     }
     
     /**
-     * Toggle sound
+     * Toggle sound (master mute: voice and sound move together to the
+     * same value — independently flipping them can leave the two channels
+     * out of sync with the single mute button)
      */
     toggleSound() {
-        this.settings.soundEnabled = !this.settings.soundEnabled;
-        this.settings.voiceEnabled = !this.settings.voiceEnabled;
+        const muted = !(this.settings.soundEnabled || this.settings.voiceEnabled);
+        this.settings.soundEnabled = muted;
+        this.settings.voiceEnabled = muted;
         this.saveSettings();
         return this.settings.soundEnabled;
     }
@@ -699,9 +730,9 @@ class LittleFencerApp {
      * Load settings from localStorage
      */
     loadSettings() {
-        const saved = localStorage.getItem('littlefencer_settings');
-        if (saved) {
-            this.settings = { ...this.settings, ...JSON.parse(saved) };
+        const saved = safeJsonParse(localStorage.getItem('littlefencer_settings'), null);
+        if (saved && typeof saved === 'object') {
+            this.settings = { ...this.settings, ...saved };
         }
     }
     

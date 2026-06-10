@@ -8,7 +8,7 @@
 
 import { PoseLandmark } from '../pose.js';
 import { calculateAngle, calculateDistance, midpoint, calculateVelocity } from '../utils.js';
-import { DetectorConfig, DetectionGate } from '../config.js';
+import { DetectorConfig, DetectionGate, ArbitrationConfig, BaselineConfig } from '../config.js';
 
 // Action types
 export const SaberAction = {
@@ -207,9 +207,12 @@ class LungeDetector extends BaseDetector {
     }
 
     handleIdle(metrics) {
-        // Set baseline arm extension
+        // Track baseline arm extension with a slow EMA while idle so a
+        // stance change doesn't leave a stale baseline (false triggers).
         if (this.baselineArmExtension === null) {
             this.baselineArmExtension = metrics.armExtension;
+        } else {
+            this.baselineArmExtension += (metrics.armExtension - this.baselineArmExtension) * BaselineConfig.EMA_ALPHA;
         }
 
         // Check for arm extension starting
@@ -746,8 +749,12 @@ class BalestraLungeDetector extends BaseDetector {
         const rightHip = landmarks[PoseLandmark.RIGHT_HIP];
         const hipY = (leftHip.y + rightHip.y) / 2;
 
+        // Refresh baseline while idle (slow EMA) so posture changes
+        // don't accumulate into a fake "jump".
         if (this.baselineHipY === null) {
             this.baselineHipY = hipY;
+        } else if (this.phase === this.phases.IDLE) {
+            this.baselineHipY += (hipY - this.baselineHipY) * BaselineConfig.EMA_ALPHA;
         }
 
         const hipRise = this.baselineHipY - hipY;
@@ -843,8 +850,12 @@ class FlungeDetector extends BaseDetector {
         const rightAnkle = landmarks[PoseLandmark.RIGHT_ANKLE];
         const bothFeetSimilarY = Math.abs(leftAnkle.y - rightAnkle.y) < this.cfg.FEET_Y_TOLERANCE;
 
+        // Refresh baselines while idle (slow EMA) to absorb stance changes
         if (this.baselineHipY === null) this.baselineHipY = hipY;
+        else if (this.phase === this.phases.IDLE) this.baselineHipY += (hipY - this.baselineHipY) * BaselineConfig.EMA_ALPHA;
+
         if (this.baselineArmExtension === null) this.baselineArmExtension = armExtension;
+        else if (this.phase === this.phases.IDLE) this.baselineArmExtension += (armExtension - this.baselineArmExtension) * BaselineConfig.EMA_ALPHA;
 
         const hipRise = this.baselineHipY - hipY;
         const armDelta = armExtension - this.baselineArmExtension;
@@ -935,8 +946,12 @@ class ParryRiposteDetector extends BaseDetector {
         const maxArmLength = shoulderToElbow + elbowToWrist;
         const armExtension = maxArmLength > 0 ? shoulderToWrist / maxArmLength : 0;
 
+        // Refresh baseline while idle (slow EMA) so arm posture changes
+        // don't read as a parry.
         if (this.baselineWristY === null) {
             this.baselineWristY = weaponWrist.y;
+        } else if (this.phase === this.phases.IDLE) {
+            this.baselineWristY += (weaponWrist.y - this.baselineWristY) * BaselineConfig.EMA_ALPHA;
         }
 
         const wristRise = this.baselineWristY - weaponWrist.y;
@@ -986,15 +1001,19 @@ class ParryRiposteDetector extends BaseDetector {
  */
 export class ActionDetectorManager {
     constructor() {
+        // Priority order: composite detectors first so a compound motion
+        // (advance-lunge etc.) wins over its constituent simple action
+        // when both complete on the same frame.
         this.detectors = [
-            new LungeDetector(),
-            new AdvanceDetector(),
-            new RetreatDetector(),
             new AdvanceLungeDetector(),
             new BalestraLungeDetector(),
             new FlungeDetector(),
-            new ParryRiposteDetector()
+            new ParryRiposteDetector(),
+            new LungeDetector(),
+            new AdvanceDetector(),
+            new RetreatDetector()
         ];
+        this.lastActionTime = 0;
     }
 
     /**
@@ -1011,9 +1030,19 @@ export class ActionDetectorManager {
             return null;
         }
 
+        // Cooldown after a reported action: the recovery motion of one
+        // action must not be mis-read as the start of another.
+        if (Date.now() - this.lastActionTime < ArbitrationConfig.COOLDOWN_MS) {
+            return null;
+        }
+
         for (const detector of this.detectors) {
             const result = detector.detect(frame, history, velocityTracker);
             if (result) {
+                // One physical motion = one report: clear every other
+                // detector's in-flight state so it can't echo-fire.
+                this.resetAll();
+                this.lastActionTime = Date.now();
                 return result;
             }
         }

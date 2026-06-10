@@ -566,8 +566,10 @@ export class FencingStateEngine {
         if (result && result.action) {
             const now = Date.now();
 
-            // Debounce same action
-            if (result.action !== this.lastAction || now - this.lastActionTime > 2000) {
+            // Debounce same action. Kept short (800ms): the manager already
+            // enforces a global cooldown, and a 2s window here swallows
+            // legitimate rapid footwork (e.g. three quick advances).
+            if (result.action !== this.lastAction || now - this.lastActionTime > 800) {
                 this.lastAction = result.action;
                 this.lastActionTime = now;
 
@@ -579,35 +581,21 @@ export class FencingStateEngine {
     }
 
     /**
-     * Run DTW-based action matching for improved accuracy
+     * Run DTW-based action matching.
+     *
+     * Tech route R3: rule-based state machines are the single reporting
+     * path; DTW is corroboration only. Until real expert templates are
+     * recorded (current ones are synthetic placeholders), a DTW match is
+     * logged and stored for calibration/debugging but never reported to
+     * the user — two independent reporting paths produced contradictory
+     * announcements for one physical motion.
      */
     runDTWMatcher(frame) {
         const result = this.dtwMatcher.addFrame(frame);
 
         if (result) {
-            const now = Date.now();
-
-            // Debounce - don't fire if rule-based just detected same action
-            if (result.action !== this.lastAction || now - this.lastActionTime > 2000) {
-                console.log(`[DTW] Matched: ${result.displayName} (confidence: ${(result.confidence * 100).toFixed(1)}%)`);
-
-                this.lastAction = result.action;
-                this.lastActionTime = now;
-
-                if (this.onActionDetected) {
-                    // Map DTW result to standard format - STRICTER quality thresholds
-                    const quality = result.confidence > 0.85 ? 'PERFECT' :   // 85%+ = Perfect
-                        result.confidence > 0.75 ? 'GOOD' :                   // 75-85% = Good
-                            result.confidence > 0.65 ? 'ACCEPTABLE' : 'POOR';     // 65-75% = Acceptable, <65% = Poor
-
-                    // Only report ACCEPTABLE or better
-                    if (quality !== 'POOR') {
-                        this.onActionDetected(result.action, quality, result.displayName + '！');
-                    } else {
-                        console.log(`[DTW] 动作相似度不足 (${(result.confidence * 100).toFixed(1)}%), 不播报`);
-                    }
-                }
-            }
+            this.lastDTWMatch = { ...result, timestamp: Date.now() };
+            console.log(`[DTW] Matched: ${result.displayName} (confidence: ${(result.confidence * 100).toFixed(1)}%) — 仅记录，不播报`);
         }
     }
 

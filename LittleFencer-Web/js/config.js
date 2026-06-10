@@ -14,6 +14,21 @@ export const DetectionGate = {
     minVisibility: 0.5
 };
 
+// Action arbitration: after any action is reported, all detectors reset and
+// detection pauses briefly so one physical motion can't be double-reported
+// (e.g. advance-lunge echoing as a separate lunge on the next frame).
+export const ArbitrationConfig = {
+    COOLDOWN_MS: 600
+};
+
+// Idle-state baseline refresh: detectors that diff against a baseline
+// (hip height, wrist height, arm extension) slowly track the current pose
+// while idle, so shifting stance doesn't leave a stale baseline behind.
+// Per-frame EMA factor; 0.05 ≈ converges in ~1s at 30fps.
+export const BaselineConfig = {
+    EMA_ALPHA: 0.05
+};
+
 export const DetectorConfig = {
     lunge: {
         ARM_EXTENSION_START: 0.20,   // arm extension delta to enter ARM_EXTENDING

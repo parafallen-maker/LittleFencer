@@ -214,24 +214,42 @@ class VideoStorageManager {
 
     /**
      * Update video (e.g., toggle star)
+     * Read-modify-write inside ONE transaction — a separate get() + put()
+     * lets a concurrent tab's write slip in between and get overwritten.
      */
     async updateVideo(id, updates) {
-        const video = await this.getVideo(id);
-        if (!video) return null;
+        if (!this.isReady) await this.init();
 
-        const updatedVideo = { ...video, ...updates };
-        return this.saveVideo(updatedVideo);
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const getRequest = store.get(id);
+
+            getRequest.onsuccess = () => {
+                const video = getRequest.result;
+                if (!video) {
+                    resolve(null);
+                    return;
+                }
+
+                const updatedVideo = typeof updates === 'function'
+                    ? updates(video)
+                    : { ...video, ...updates };
+
+                const putRequest = store.put(updatedVideo);
+                putRequest.onsuccess = () => resolve(updatedVideo);
+                putRequest.onerror = () => reject(putRequest.error);
+            };
+
+            getRequest.onerror = () => reject(getRequest.error);
+        });
     }
 
     /**
-     * Toggle star status
+     * Toggle star status (atomic — see updateVideo)
      */
     async toggleStar(id) {
-        const video = await this.getVideo(id);
-        if (!video) return null;
-
-        video.starred = !video.starred;
-        return this.saveVideo(video);
+        return this.updateVideo(id, (video) => ({ ...video, starred: !video.starred }));
     }
 
     /**
