@@ -13,6 +13,7 @@ import { UIManager } from './ui.js';
 import { SkeletonRenderer } from './skeleton.js';
 import { platform, requestWakeLock } from './platform.js';
 import { videoStorage } from './storage.js';
+import { safeJsonParse } from './utils.js';
 
 class LittleFencerApp {
     constructor() {
@@ -47,7 +48,8 @@ class LittleFencerApp {
             voiceEnabled: true,
             soundEnabled: true,
             skeletonEnabled: true,
-            autoRecordEnabled: true
+            autoRecordEnabled: true,
+            practiceAction: 'all'
         };
         
         this.loadSettings();
@@ -65,8 +67,16 @@ class LittleFencerApp {
      * Initialize the app
      */
     async init() {
+        // Re-entry guard: a second init() would create duplicate
+        // camera/pose/engine instances and leak the old ones.
+        if (this.isInitialized || this.isInitializing) {
+            console.warn('[App] init() called twice, ignoring');
+            return;
+        }
+        this.isInitializing = true;
+
         console.log('[App] Initializing LittleFencer...');
-        
+
         try {
             // Update loading progress
             this.updateLoadingProgress(10, '初始化界面...');
@@ -74,7 +84,11 @@ class LittleFencerApp {
             // Initialize UI
             this.ui = new UIManager(this);
             this.ui.init();
-            
+
+            // Wire the settings modal before the heavy model load:
+            // settings must stay usable even if MediaPipe fails to load.
+            this.setupSettingsModal();
+
             this.updateLoadingProgress(20, '初始化摄像头...');
             
             // Initialize camera
@@ -93,6 +107,7 @@ class LittleFencerApp {
             
             // Initialize fencing state engine
             this.engine = new FencingStateEngine();
+            this.applyPracticeAction();
             
             // Initialize feedback manager
             this.feedback = new AudioFeedbackManager();
@@ -132,6 +147,8 @@ class LittleFencerApp {
             console.error('[App] Initialization failed:', error);
             this.updateLoadingProgress(0, `初始化失败: ${error.message}`);
             throw error;
+        } finally {
+            this.isInitializing = false;
         }
     }
     
@@ -182,10 +199,70 @@ class LittleFencerApp {
             this.handleFeedback(message, type);
         };
         
+        // Visibility change callback
+        this.engine.onVisibilityChange = (visibilityInfo) => {
+            this.handleVisibilityChange(visibilityInfo);
+        };
+        
         // Pose detector callback
         this.poseDetector.onResults = (results) => {
             this.handlePoseResults(results);
         };
+    }
+
+    /**
+     * Wire the settings modal (open/close, toggles, practice action)
+     */
+    setupSettingsModal() {
+        const modal = document.getElementById('settings-modal');
+        if (!modal) return;
+
+        document.getElementById('btn-settings')?.addEventListener('click', () => {
+            modal.classList.remove('hidden');
+        });
+        document.getElementById('btn-close-settings')?.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.add('hidden');
+        });
+
+        // Two-way binding for the toggles
+        const bindings = [
+            ['setting-voice', 'voiceEnabled'],
+            ['setting-sound', 'soundEnabled'],
+            ['setting-skeleton', 'skeletonEnabled'],
+            ['setting-autorecord', 'autoRecordEnabled']
+        ];
+        for (const [id, key] of bindings) {
+            const checkbox = document.getElementById(id);
+            if (!checkbox) continue;
+            checkbox.checked = this.settings[key];
+            checkbox.addEventListener('change', (e) => {
+                this.settings[key] = e.target.checked;
+                this.saveSettings();
+            });
+        }
+
+        // Practice action selector (single-action mode)
+        const practiceSelect = document.getElementById('setting-practice-action');
+        if (practiceSelect) {
+            practiceSelect.value = this.settings.practiceAction || 'all';
+            practiceSelect.addEventListener('change', (e) => {
+                this.settings.practiceAction = e.target.value;
+                this.applyPracticeAction();
+                this.saveSettings();
+            });
+        }
+    }
+
+    /**
+     * Single-action practice: only run the detector being practiced
+     */
+    applyPracticeAction() {
+        if (!this.engine) return;
+        const action = this.settings.practiceAction || 'all';
+        this.engine.setEnabledActions(action === 'all' ? null : [action]);
     }
     
     /**
@@ -299,24 +376,46 @@ class LittleFencerApp {
      */
     handlePoseResults(results) {
         if (!this.isRunning) return;
-        
+
         // Update FPS
         this.frameCount++;
-        
-        // Process pose with engine
-        if (results.poseLandmarks) {
-            this.engine.processPose(results.poseLandmarks, results.poseWorldLandmarks);
-            
-            // Render skeleton
-            if (this.settings.skeletonEnabled) {
-                const quality = this.engine.getCurrentQuality();
-                this.skeleton.render(results.poseLandmarks, quality);
+
+        // A single bad frame must not take down the whole loop — swallow
+        // per-frame errors, surface once, and keep processing.
+        try {
+            if (results.poseLandmarks) {
+                this.engine.processPose(results.poseLandmarks, results.poseWorldLandmarks);
+
+                if (this.settings.skeletonEnabled) {
+                    const quality = this.engine.getCurrentQuality();
+                    this.skeleton.render(results.poseLandmarks, quality);
+                }
+            } else {
+                // No pose detected
+                this.skeleton.clear();
+                this.engine.handleNoPose();
             }
-        } else {
-            // No pose detected
-            this.skeleton.clear();
-            this.engine.handleNoPose();
+            this.frameErrorCount = 0;
+        } catch (error) {
+            this.frameErrorCount = (this.frameErrorCount || 0) + 1;
+            if (this.frameErrorCount === 1) {
+                console.error('[App] Frame processing error:', error);
+                this.ui.showFeedback('检测出现异常，已自动恢复', 'error');
+            } else if (this.frameErrorCount >= 90) {
+                // ~3s of consecutive failures at 30fps: something is
+                // structurally broken, stop instead of spinning.
+                console.error('[App] Persistent frame errors, stopping session');
+                this.ui.showFeedback('检测持续异常，请刷新页面', 'error');
+                this.stop();
+            }
         }
+    }
+    
+    /**
+     * Handle visibility change from engine
+     */
+    handleVisibilityChange(visibilityInfo) {
+        this.ui.updateVisibility(visibilityInfo);
     }
     
     /**
@@ -330,7 +429,21 @@ class LittleFencerApp {
         
         // Handle specific states
         switch (state) {
+            case 'WAITING_FULL_BODY':
+                // Show position guide
+                this.ui.showPositionGuide(true);
+                if (this.settings.voiceEnabled) {
+                    this.feedback.speak('请后退，确保全身入镜');
+                }
+                break;
+                
+            case 'IDLE':
+                // Hide position guide when full body detected
+                this.ui.showPositionGuide(false);
+                break;
+                
             case 'EN_GARDE':
+                this.ui.showPositionGuide(false);
                 if (this.settings.voiceEnabled) {
                     this.feedback.speak('好！保持姿势');
                 }
@@ -411,8 +524,10 @@ class LittleFencerApp {
         
         try {
             const stream = this.camera.getStream();
-            await this.recorder.start(stream);
-            this.ui.setRecordingState(true);
+            const started = await this.recorder.start(stream);
+            if (started !== false) {
+                this.ui.setRecordingState(true);
+            }
         } catch (error) {
             console.error('[App] Failed to start recording:', error);
         }
@@ -580,11 +695,14 @@ class LittleFencerApp {
     }
     
     /**
-     * Toggle sound
+     * Toggle sound (master mute: voice and sound move together to the
+     * same value — independently flipping them can leave the two channels
+     * out of sync with the single mute button)
      */
     toggleSound() {
-        this.settings.soundEnabled = !this.settings.soundEnabled;
-        this.settings.voiceEnabled = !this.settings.voiceEnabled;
+        const muted = !(this.settings.soundEnabled || this.settings.voiceEnabled);
+        this.settings.soundEnabled = muted;
+        this.settings.voiceEnabled = muted;
         this.saveSettings();
         return this.settings.soundEnabled;
     }
@@ -673,9 +791,9 @@ class LittleFencerApp {
      * Load settings from localStorage
      */
     loadSettings() {
-        const saved = localStorage.getItem('littlefencer_settings');
-        if (saved) {
-            this.settings = { ...this.settings, ...JSON.parse(saved) };
+        const saved = safeJsonParse(localStorage.getItem('littlefencer_settings'), null);
+        if (saved && typeof saved === 'object') {
+            this.settings = { ...this.settings, ...saved };
         }
     }
     

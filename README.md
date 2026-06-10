@@ -6,295 +6,86 @@
   <img src="docs/banner.png" alt="LittleFencer Banner" width="600">
 </p>
 
-[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web%20%7C%20WeChat-blue.svg)](/)
-[![Android](https://img.shields.io/badge/Android-12%2B-green.svg)](/)
-[![iOS](https://img.shields.io/badge/iOS-15%2B-lightgrey.svg)](/)
 [![Web](https://img.shields.io/badge/Web-PWA-purple.svg)](/)
-[![WeChat](https://img.shields.io/badge/WeChat-MiniProgram-brightgreen.svg)](/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## 📖 简介
 
-LittleFencer 是一款基于 AI 姿态识别的青少年佩剑（Saber）训练辅助 App。通过手机摄像头实时分析训练者的动作姿态，提供即时的语音和视觉反馈，帮助青少年击剑爱好者在家中进行科学、有效的基础动作训练。
+LittleFencer 是一款基于 AI 姿态识别的青少年佩剑（Saber）训练辅助应用（Web PWA）。通过设备摄像头实时分析训练者的动作姿态，提供即时的语音和视觉反馈，帮助青少年击剑爱好者在家中进行科学、有效的基础动作训练。
 
-**🎉 全平台支持：Android、iOS、Web PWA、微信小程序！**
+- **零安装** — 浏览器打开即用，支持添加到主屏幕、离线使用
+- **零云端** — 所有数据（视频、成绩）存储在本地 IndexedDB，无隐私风险
+
+> 历史版本曾包含 Android / iOS / 微信小程序实现，现已归档（见 `归档.zip` 及 git 历史），当前仅维护 Web 版。
 
 ### ✨ 核心特性
 
-- **🪞 智能数字镜子** - 实时显示骨骼叠加层，绿色表示正确姿势，红色提示需要纠正
-- **🎯 AI 姿态分析** - 基于 MediaPipe (Android) / Vision Framework (iOS) 的实时姿态检测
-- **⚔️ 7种动作识别** - 支持前进步、后退步、弓步、前进弓步、跳步弓步、飞弓步、格挡反攻
-- **🗣️ 语音教练** - TTS 语音即时反馈，如"膝盖外展！"、"手臂先动！"、"保持直立！"
-- **📹 精彩回放** - 自动录制训练动作，支持"行车记录仪"模式预缓冲
-- **🏆 视频分类** - 自动将录像分为"⭐ 精彩"和"📝 待改进"两类
-- **🔥 连击系统** - Combo 计数器激励持续完成标准动作
-
-## 🎮 功能模块
-
-### 动作检测器 (Action Detectors)
-
-| 动作 | 英文名 | 检测原理 |
-|------|--------|---------|
-| 前进步 | Advance | 前脚先动，重心前移 |
-| 后退步 | Retreat | 后脚先动，重心后移 |
-| 弓步 | Lunge | 4阶段状态机：手臂伸展→发力→落地→恢复 |
-| 前进弓步 | Advance-Lunge | 前进步 + 弓步组合 |
-| 跳步弓步 | Balestra-Lunge | 双脚跳跃 + 弓步 |
-| 飞弓步 | Flunge | 佩剑特有，空中攻击 |
-| 格挡反攻 | Parry-Riposte | 防守后快速反击 |
-
-### Phase 1: 数字镜子 (Mirror)
-- CameraX / AVFoundation 前置摄像头预览
-- MediaPipe / Vision Framework 33/19点骨骼检测
-- 实时骨骼渲染叠加层
-
-### Phase 2: 裁判与摄影师 (Judge & Cameraman)
-- 状态机检测：IDLE → EN_GARDE → LUNGING → RECOVERY
-- 动作质量评估与实时纠正
-- 自动录制精彩动作到系统相册
-
-### Phase 3: 游戏化 (Game)
-- 音效反馈（正确/错误/完美）
-- 粒子特效庆祝
-- Combo 连击计数
-- 分享按钮与视频库
-
-## 🛠️ 技术栈
-
-### 平台支持
-
-| 平台 | 定位 | 状态 |
-|------|------|------|
-| **Android** | 主力训练平台 | ✅ 完成 |
-| **iOS** | 主力训练平台 | ✅ 完成 |
-| **Web PWA** | 跨平台轻量版 | ✅ 完成 |
-| **微信小程序** | 社交裂变入口 | 🚧 开发中 |
-
-### Android
-
-| 组件 | 技术 |
-|------|------|
-| **平台** | Android 12+ (API 31) |
-| **语言** | Kotlin |
-| **相机** | CameraX (Preview + ImageAnalysis + VideoCapture) |
-| **AI 姿态** | MediaPipe Tasks Vision (pose_landmarker_lite.task) |
-| **音频** | TextToSpeech + SoundPool |
-| **DI** | Hilt |
-
-### iOS
-
-| 组件 | 技术 |
-|------|------|
-| **平台** | iOS 15+ |
-| **语言** | Swift 5.0 |
-| **UI** | SwiftUI |
-| **相机** | AVFoundation |
-| **AI 姿态** | Vision Framework (VNDetectHumanBodyPoseRequest) |
-| **音频** | AVSpeechSynthesizer |
-
-### Web PWA
-
-| 组件 | 技术 |
-|------|------|
-| **框架** | 原生 JavaScript (ES Modules) |
-| **相机** | getUserMedia API |
-| **AI 姿态** | MediaPipe Pose (CDN) |
-| **存储** | IndexedDB |
-| **离线** | Service Worker |
-| **分享** | Web Share API |
-
-### 微信小程序
-
-| 组件 | 技术 |
-|------|------|
-| **框架** | 微信原生 |
-| **相机** | Camera 组件 |
-| **AI 姿态** | Vision Kit |
-| **存储** | 云开发 |
-| **分享** | 原生分享能力 |
-
-## 📁 项目结构
-
-```
-LittleFencer/                        # 项目根目录
-├── docs/                            # 文档目录
-│
-LittleFencer-Android/                # Android 项目 (同级目录)
-├── app/src/main/java/com/littlefencer/app/
-│   ├── MainActivity.kt              # 主训练界面
-│   ├── camera/CameraManager.kt      # CameraX 管理
-│   ├── pose/PoseDetector.kt         # MediaPipe 姿态检测
-│   ├── logic/
-│   │   ├── FencingStateEngine.kt    # 击剑状态机
-│   │   ├── ActionModels.kt          # 动作模型定义
-│   │   ├── ActionDetectorManager.kt # 检测器管理
-│   │   └── detectors/               # 7种动作检测器
-│   ├── feedback/AudioFeedbackManager.kt
-│   ├── recorder/VideoRecorder.kt
-│   └── gallery/GalleryActivity.kt
-├── build.gradle.kts
-├── settings.gradle.kts
-└── gradlew
-│
-LittleFencer-iOS/                    # iOS 项目 (同级目录)
-├── LittleFencer.xcodeproj
-└── LittleFencer/
-    ├── App/                     # SwiftUI App 入口
-    ├── Views/                   # UI 视图
-    ├── Camera/CameraManager.swift
-    ├── Pose/PoseDetector.swift  # Vision Framework
-    ├── Logic/
-    │   ├── FencingStateEngine.swift
-    │   ├── ActionModels.swift
-    │   ├── ActionDetectorManager.swift
-    │   └── Detectors/           # 7种动作检测器
-    ├── Feedback/AudioFeedbackManager.swift
-    └── Recorder/VideoRecorder.swift
-
-LittleFencer-Web/                # Web PWA 项目 (同级目录)
-├── index.html                   # 主入口
-├── manifest.json                # PWA 配置
-├── sw.js                        # Service Worker
-├── css/style.css                # 样式
-└── js/
-    ├── app.js                   # 主应用
-    ├── camera.js                # 相机管理
-    ├── pose.js                  # MediaPipe 姿态检测
-    ├── engine.js                # 击剑状态机
-    ├── feedback.js              # 音频反馈
-    ├── recorder.js              # 视频录制
-    ├── storage.js               # IndexedDB 存储
-    ├── platform.js              # iOS 兼容性
-    └── detectors/               # 动作检测器
-
-LittleFencer-MiniProgram/        # 微信小程序 (同级目录)
-├── app.js                       # 小程序入口
-├── app.json                     # 配置
-├── pages/
-│   ├── index/                   # 首页
-│   ├── training/                # 训练页
-│   ├── gallery/                 # 视频画廊
-│   ├── challenge/               # 好友挑战
-│   └── rank/                    # 排行榜
-└── components/                  # 自定义组件
-```
+- **🪞 智能数字镜子** - 实时骨骼叠加层，绿色表示正确姿势，红色提示需要纠正
+- **🎯 AI 姿态分析** - MediaPipe Pose 33 关键点 + 3 级信号过滤管线
+- **⚔️ 7 种动作识别** - 前进步、后退步、弓步、前进弓步、跳步弓步、飞弓步、格挡反攻
+- **🧠 DTW 模板匹配** - 动态时间规整对比标准动作模板，关键帧触发优化性能
+- **🗣️ 语音教练** - 中文 TTS 即时纠正，如"手臂先动！"、"后腿伸直！"
+- **📹 训练回放** - MediaRecorder 录制 + IndexedDB 本地视频库
+- **🔥 连击与成就** - Combo 计数器 + 4 枚成就徽章激励持续标准动作
 
 ## 🚀 快速开始
 
-### Android
-
-#### 环境要求
-- Android Studio Hedgehog (2023.1.1) 或更高版本
-- JDK 17+
-- Android SDK 34
-- 支持 Camera2 API 的 Android 设备 (API 31+)
-
-#### 构建步骤
-
 ```bash
-# 克隆仓库
-git clone https://github.com/parafallen-maker/LittleFencer.git
-cd LittleFencer/LittleFencer-Android
-
-# 构建 Debug APK
-./gradlew assembleDebug
-
-# 安装到设备
-./gradlew installDebug
-```
-
-### iOS
-
-#### 环境要求
-- Xcode 15.0 或更高版本
-- macOS Ventura 或更高
-- iOS 15+ 真机设备（相机功能需要真机）
-
-#### 构建步骤
-
-```bash
-# iOS 项目在同级目录
-cd LittleFencer/LittleFencer-iOS
-
-# 使用 Xcode 打开
-open LittleFencer.xcodeproj
-
-# 或命令行构建
-xcodebuild -scheme LittleFencer -sdk iphoneos build
-```
-
-### Web PWA
-
-```bash
-# Web PWA 项目在同级目录
-cd LittleFencer/LittleFencer-Web
+cd LittleFencer-Web
 
 # 启动本地服务器
+./serve.sh
+# 或
 python3 -m http.server 8080
 
 # 浏览器访问
 open http://localhost:8080
 ```
 
-> 💡 Web PWA 支持添加到主屏幕，可离线使用
+手机使用：确保手机与电脑在同一 WiFi，访问终端显示的局域网地址，点击"添加到主屏幕"即可像 App 一样使用。
 
-### 微信小程序
-
-```bash
-# 小程序项目在同级目录
-cd LittleFencer/LittleFencer-MiniProgram
-
-# 用微信开发者工具打开项目
-# 1. 填写 AppID
-# 2. 配置云开发环境
-# 3. 编译预览
-```
-
-详细文档：[小程序开发指南](LittleFencer-MiniProgram/README.md)
-
-### 权限说明
-
-#### Android
-- `CAMERA` - 摄像头预览和姿态检测
-- `RECORD_AUDIO` - 录像时录制声音
-- `READ_MEDIA_VIDEO` - 访问视频库 (Android 13+)
-
-#### iOS
-- `NSCameraUsageDescription` - 摄像头访问
-- `NSMicrophoneUsageDescription` - 麦克风访问
-- `NSPhotoLibraryAddUsageDescription` - 保存视频到相册
+> 💡 详细开发说明（HTTPS 配置、调试日志等）见 [LittleFencer-Web/README.md](LittleFencer-Web/README.md)
 
 ## 📱 使用指南
 
-1. **站位** - 将手机放置在身前 2-3 米处，确保全身入镜
-2. **准备** - 摆出 En Garde（预备）姿势，等待绿色骨骼显示
-3. **训练** - 执行弓步动作，系统会自动检测并评分
-4. **回看** - 精彩动作自动保存，可在视频库中查看和分享
+1. **站位** - 将设备放置在身前 2-3 米处，横屏，确保全身入镜
+2. **准备** - 系统检测到全身（9 关键点 × 连续 10 帧）后，摆出 En Garde 预备姿势
+3. **训练** - 执行弓步等动作，系统自动检测、评分（完美/良好/可接受/需改进）
+4. **回看** - 训练视频保存在本地视频库，可回放和分享
 
-## 🎯 检测指标
+## 📸 截图
 
-| 指标 | 标准范围 | 反馈 |
+<p align="center">
+  <img src="docs/screenshots/screenshot_training.png" alt="训练界面" width="45%">
+  <img src="docs/screenshots/screenshot_gallery.png" alt="视频库" width="45%">
+</p>
+
+## 🎯 检测指标（FIE 标准）
+
+| 指标 | 标准范围 | 语音反馈 |
 |------|----------|------|
-| 前膝角度 | 90° - 120° | "Bend more!" / "Too low!" |
-| 后腿伸直 | > 155° | "Push back leg!" |
-| 站距宽度 | 1.2x - 2.0x 肩宽 | "Wider stance!" |
-| 躯干倾斜 | < 20° | "Stay upright!" |
-| 头部位置 | 不低于肩 | "Head up!" |
+| 前膝角度（弓步） | 85° - 100° | "前膝再弯！" |
+| 后腿伸直 | > 160° | "后腿伸直！" |
+| 手臂先于腿 | 伸展 ≥ 90% | "手臂先动！" |
+| 躯干前倾（En Garde） | ≤ 12° | "保持直立！" |
+| 步距 | 0.9 - 1.3× 肩宽 | "步距调整！" |
+
+## 📚 相关文档
+
+- [产品需求文档（PRD）](docs/prd.md)
+- [架构与实现（含固化技术路线）](docs/architecture.md)
+- [MVP 缺陷与漏洞清单](docs/mvp-defects.md)
+- [功能路线图](docs/roadmap.md)
+- [验收测试清单](docs/acceptance_checklist.md)
+- [Web 项目说明](LittleFencer-Web/README.md)
 
 ## 📄 License
 
 MIT License - 详见 [LICENSE](LICENSE) 文件
 
-## � 相关文档
-
-- [Android PRD](docs/prd.md) - Android 版产品需求文档
-- [微信小程序 PRD](docs/prd-miniprogram.md) - 小程序版产品需求文档
-- [小程序开发任务](docs/todos-miniprogram.md) - 小程序开发任务清单
-
-## �🙏 致谢
+## 🙏 致谢
 
 - [MediaPipe](https://developers.google.com/mediapipe) - Google 的跨平台 ML 框架
-- [CameraX](https://developer.android.com/training/camerax) - Jetpack 相机库
 - 所有击剑教练和青少年运动员的反馈
 
 ---

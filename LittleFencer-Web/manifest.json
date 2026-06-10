@@ -1,11 +1,11 @@
 {
-    "name": "LittleFencer",
-    "short_name": "LittleFencer",
-    "description": "AI驱动的青少年佩剑训练助手",
-    "start_url": "/",
-    "display": "standalone",
-    "orientation": "any",
-    "background_color": "#0f0f1a",
+    "name": "小剑客训练",
+    "short_name": "小剑客",
+    "description": "AI驱动的青少年佩剑训练助手 - 实时语音纠错",
+    "start_url": "/training.html",
+    "display": "fullscreen",
+    "orientation": "landscape",
+    "background_color": "#0a0a15",
     "theme_color": "#1a1a2e",
     "icons": [
         {
@@ -29,18 +29,22 @@
     "screenshots": [
         {
             "src": "assets/screenshots/screenshot_training.png",
-            "sizes": "1080x1920",
+            "sizes": "1408x768",
             "type": "image/png",
             "label": "训练界面 - AI实时姿态检测"
         },
         {
             "src": "assets/screenshots/screenshot_gallery.png",
-            "sizes": "1080x1920",
+            "sizes": "1408x768",
             "type": "image/png",
             "label": "视频库 - 训练回放"
         }
     ],
-    "categories": ["sports", "fitness", "health"],
+    "categories": [
+        "sports",
+        "fitness",
+        "health"
+    ],
     "lang": "zh-CN",
     "dir": "ltr"
 }

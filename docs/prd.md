@@ -1,110 +1,168 @@
-# Product Requirements Document: LittleFencer (Android Edition)
+# 产品需求文档：LittleFencer Web
 
-> **Version:** 2.2 (Smart Mirror & Direct Recording)  
-> **Status:** Draft  
-> **Last Updated:** 2026-01-31  
-> **Platform:** Android Only  
-> **Scope:** Sabre (佩剑) Training Only
+> **版本：** 3.0  
+> **状态：** 活跃  
+> **更新日期：** 2026-06-10  
+> **平台：** Web PWA（渐进式 Web 应用）  
+> **范围：** 仅限佩剑训练
 
-## 1. Product Vision: The "Smart Digital Mirror"
-**LittleFencer** transforms an Android device into an intelligent, always-watching **"Digital Mirror"** for youth sabre fencers.
-- **Zero-Touch:** No "Record" button. It watches, analyzes, and saves highlights automatically.
-- **High-Viz Feedback:** Designed for viewing from 3 meters away—big skeletons, bright colors, and clear audio.
-- **Social-First:** Every cool move is instantly ready to share.
+## 1. 产品愿景
 
-## 2. Core User Scenarios
+**LittleFencer** 将任何带有浏览器和摄像头的设备变成一面智能 **"AI 数字镜"**，服务于青少年佩剑运动员。
 
-### 2.1 The "Living Room Dojo" (Solo Practice)
-- **User:** Leo (10 years old) practicing lunges at home.
-- **Flow:** Leo props the phone on a water bottle -> Strikes an **En Garde** pose -> Phone "Dings" and shows a **Green Skeleton** (Calibrated) -> Leo lunges.
-- **Feedback:**
-    - **Mistake:** Knee collapses inward -> Skeleton flashes **RED** + Audio: "Knee out!"
-    - **Perfect:** Deep lunge, straight back -> Skeleton glows **NEON GREEN** + Screen bursts with **✨Sparkles✨** + Audio: "Nice Lunge!"
+- **零安装：** 打开网址即可开始训练 — 无需应用商店。
+- **零操作：** 无需点击"录制"按钮。自动观察、分析、提供反馈。
+- **高可见度反馈：** 专为 2-3 米观看距离设计 — 明亮骨骼线、大字体、即时语音。
+- **离线可用：** PWA + Service Worker — 首次加载后可在任何地方训练。
 
-### 2.2 The "Action Slicer" (Auto-Clip)
-- **Context:** Leo completes a Lunge + Recovery.
-- **System Action (P0):** App detects action boundaries (Start → End) and saves that segment directly.
-- **P1 Enhancement:** "Dashcam Mode" (rolling buffer) for retrospective capture with pre-padding.
-- **Result:** A video clip is **silently saved** to the System Gallery. Leo keeps training.
+## 2. 核心用户场景
 
-### 2.3 The "Brag Button" (Instant Share)
-- **Context:** Training break. Leo sees a "New Highlight" floating bubble.
-- **Action:** Taps bubble -> Android Share Sheet opens.
-- **Result:** One tap to send the clip to WeChat/WhatsApp group "Fencing Squad".
+### 2.1 "客厅道场"（独自练习）
 
-## 3. Functional Requirements (MVP)
+- **用户：** Leo（10 岁），在家练习弓步。
+- **流程：** 打开平板上的 PWA → 全身站在画面中 → 摆出 **En Garde** → 系统提示"全身已检测到！准备训练" → Leo 出弓步。
+- **反馈：**
+    - **错误：** 后腿没伸直 → 骨骼变**红** + 语音"后腿伸直！"
+    - **标准：** 手臂先出、深弓步 → 骨骼变**绿** + 语音"完美弓步！" + 连击数++
 
-### 3.1 "Zero-Touch" Training Mode
-- **Auto-Calibration:** Detects "En Garde" pose to set floor plane and user height. No manual setup.
-- **Always-On Analysis:** 
-    - **Green Line:** Good posture (Knee 90°-120°, Arm extended).
-    - **Red Line:** Bad posture (Knee <90° or >135°, Arm retracted).
-- **Latency:** < 50ms render time for "mirror" feel.
+### 2.2 "训练模式"（专项练习）
 
-### 3.2 Intelligent Auto-Slicing ("Action Slicer")
-- **P0 Mechanism (Direct Recording):**
-    - Uses standard `MediaRecorder` / `MediaCodec` for live recording.
-    - AI detects action start → begins recording; detects action end → stops and saves.
-    - **No buffering / no pre-padding** (misses the split-second before action starts, acceptable for MVP).
-- **P1 Enhancement (Dashcam Mode - Deferred):**
-    - Ring buffer storing last 10 seconds in RAM for retrospective capture with padding.
-- **Storage:** Writes directly to `MediaStore` (System Gallery / DCIM).
+- **入口：** `training.html` — 简化 UI，最大化专注力。
+- **功能：** 速度追踪 vs 个人平均值、连击计数器、5 条关键语音纠正、训练计时。
 
-### 3.3 Gamified Feedback System
-- **Visuals:**
-    - **Skeleton Overlay:** High-contrast lines (Neon Green / Bright Red).
-    - **Particle Effects:** Explosion of stars/confetti on "Perfect" moves.
-- **Audio:**
-    - **TTS Corrections:** "Arm first!", "Too high!".
-    - **SFX:** "Ding" for good, "Buzz" for bad.
-- **Combo Counter:** Big number on screen incrementing for consecutive good reps.
+### 2.3 "教练工具"（动作标注）
 
-### 3.4 Feature Exclusions
-- **No Playback UI:** Users view videos in their own Gallery app.
-- **No Cloud:** Zero server costs, zero data privacy liability.
-- **No Login:** Install and start.
+- **入口：** `annotator.html` — 导入视频，逐帧标注动作标签。
+- **输出：** 可导出的标注数据用于分析。
 
-## 4. Technical Specifications
+### 2.4 "技术参考"（标准页面）
 
-### 4.1 Technology Stack
--   **Language:** Kotlin (Android Native).
--   **Min SDK:** API 31 (Android 12).
--   **AI Engine:** MediaPipe Tasks Vision (`pose_landmarker_lite`).
--   **Camera:** Android CameraX API.
--   **Video Recording (P0):** Standard `MediaRecorder` (direct recording, no buffer).
--   **Video Recording (P1):** MediaCodec + MediaMuxer (Custom Ring Buffer for "Dashcam").
+- **入口：** `standards.html` — FIE 生物力学标准展示，涵盖 En Garde、弓步、前进步、后退步。
 
-### 4.2 AI Pipeline
--   **Input:** CameraX `ImageAnalysis` stream (YUV/RGB).
--   **Inference:** GPU/NPU Delegate.
--   **Logic:** Custom Rule-Based State Machine for Action Recognition.
+## 3. 功能需求
 
-### 4.3 Video Pipelining
--   **P0:** Direct write via `MediaRecorder` → `MediaStore`.
--   **P1:** In-memory circular buffer (approx. 10MB for 10s @ 720p) + MediaMuxer.
+### 3.1 实时姿态检测
 
-### 4.4 Data Persistence
--   **Local Only:** No backend database. Shared Preferences for settings.
-- **Permissions:** 
-    - `CAMERA` (Essential)
-    - `READ_MEDIA_VIDEO` / `WRITE_EXTERNAL_STORAGE` (For saving to Gallery)
+| 功能 | 规格 |
+|------|------|
+| **AI 引擎** | MediaPipe Pose（WASM/WebGL，CDN 加载）— 33 个关键点 |
+| **过滤管线** | 3 级：OutlierRejector → ConfidenceWeightedFilter → OneEuroFilter |
+| **全身检测** | 9 个关键点 ×（置信度 ≥ 0.7 + 画面坐标 5%-95%）× 连续 10 帧 |
+| **渲染延迟** | < 50ms，达到"镜像"体感 |
 
-## 5. Development Roadmap (Checklist)
+### 3.2 动作检测（7 个检测器）
 
-### Phase 1: The "Mirror" (Week 1)
-- [ ] Project Setup (Kotlin / Android Studio).
-- [ ] CameraX Preview (Landscape, High FPS).
-- [ ] MediaPipe Pose Integration (Skeleton Overlay).
-- [ ] Basic "En Garde" Detection (Static Pose Check).
+| # | 动作 | 中文名 | 检测方法 |
+|---|------|--------|---------|
+| 1 | Lunge | 弓步 | 4 阶段状态机（手臂先出原则） |
+| 2 | Advance | 前进步 | 髋部重心速度（统一过滤管线） |
+| 3 | Retreat | 后退步 | 髋部重心速度（统一过滤管线） |
+| 4 | Advance-Lunge | 前进弓步 | 前进步→弓步复合检测 |
+| 5 | Balestra-Lunge | 跳步弓步 | 跳跃检测 + 弓步 |
+| 6 | Flunge | 飞弓步 | 前冲 + 髋部上升 |
+| 7 | Parry-Riposte | 格挡反攻 | 手腕上升 → 手臂伸展 |
 
-### Phase 2: The "Judge" & "Cameraman" (Week 2)
-- [ ] Algorithmic State Machine (Idle -> En Garde -> Lunge -> Recovery).
-- [ ] **Direct Recording Integration (MediaRecorder, No Buffer)**.
-- [ ] Rule-Based Triggering (Start/Stop recording on action detection).
-- [ ] Save to Gallery via `MediaStore`.
+### 3.3 DTW 模板匹配
 
-### Phase 3: The "Game" (Week 3)
-- [ ] UI Polish (Particle Effects, Big Fonts).
-- [ ] Audio/TTS Feedback Manager.
-- [ ] Combo Counter Logic.
-- [ ] Floating "Share Now" Button.
+- 动态时间规整（DTW）将用户动作序列与参考模板进行对比。
+- **关键帧检测器（KeyframeDetector）** 仅在运动结束时触发 DTW（节省 CPU）。
+- **模板录制器（TemplateRecorder）** 支持教练录制标准动作。
+- 特征提取：基于身体尺寸归一化、髋部重心相对坐标 + 关节角度。
+
+### 3.4 反馈系统
+
+| 渠道 | 实现方式 |
+|------|---------|
+| **骨骼叠加** | Canvas + CSS `scaleX(-1)` 镜像，霓虹绿（正确）/ 红色（错误） |
+| **语音** | Web Speech API（SpeechSynthesis），中文 TTS |
+| **音效** | Web Audio API（OscillatorNode），无需外部音频文件 |
+| **连击计数器** | 屏幕显示连续标准动作次数 |
+| **质量等级** | 完美 / 良好 / 可接受 / 需改进 |
+
+### 3.5 视频与存储
+
+- **录制：** MediaRecorder API
+- **存储：** IndexedDB（`LittleFencerDB`），按质量/收藏/时间戳建索引
+- **100% 本地：** 零云端、零服务器、零隐私风险
+
+### 3.6 FIE 技术标准（内置）
+
+引擎内置国际击剑联合会（FIE）生物力学数据：
+
+| 动作 | 关键指标 |
+|------|---------|
+| **En Garde（预备姿势）** | 前膝 80-110°，躯干前倾 ≤12°，步距 0.9-1.3× 肩宽 |
+| **弓步** | 前膝 85-100°，后腿 160-180°，手臂伸展 ≥90%，手臂先于腿 |
+| **前进步** | 膝角 80-130°，垂直弹跳 ≤3%，保持步距 |
+| **后退步** | 膝角 80-130°，垂直弹跳 ≤3%，保持步距 |
+
+### 3.7 不在范围内
+
+- 无登录/账号系统
+- 无云端后台
+- 无多人检测
+- 无格挡位置分类（tierce/quarte/quinte — 后续版本）
+
+## 4. 技术栈
+
+| 组件 | 技术 |
+|------|------|
+| **运行时** | 浏览器原生 ES Modules（无构建步骤） |
+| **AI 引擎** | MediaPipe Pose（CDN，WASM/WebGL） |
+| **信号过滤** | OneEuroFilter、OutlierRejector、ConfidenceWeightedFilter |
+| **语音** | Web Speech API |
+| **音效** | Web Audio API |
+| **视频** | MediaRecorder API |
+| **离线** | Service Worker + Cache API |
+| **存储** | IndexedDB + LocalStorage |
+| **PWA** | manifest.json + Service Worker |
+
+## 5. 浏览器兼容性
+
+| 浏览器 | 状态 |
+|--------|------|
+| Chrome 桌面/移动端 | ✅ 完全支持 |
+| Safari iOS 14.5+ | ✅ 支持 |
+| Firefox | ✅ 支持 |
+| Edge | ✅ 支持 |
+| 微信内置浏览器 | ⚠️ 部分支持 |
+
+## 6. 开发状态
+
+### 已完成 ✅
+
+- [x] MediaPipe 33 关键点姿态检测
+- [x] 7 个动作检测器（状态机驱动）
+- [x] 3 级信号处理管线
+- [x] 统一速度管线（引擎→检测器）
+- [x] 严格全身检测（置信度 + 边界）
+- [x] FIE 技术标准集成
+- [x] DTW 模板匹配 + 关键帧检测器
+- [x] 模板录制工具（教练用）
+- [x] TTS 语音反馈（中文）
+- [x] Web Audio 音效
+- [x] 骨骼叠加渲染（CSS 镜像）
+- [x] 连击计数器 & 质量评估
+- [x] 视频录制（MediaRecorder）
+- [x] IndexedDB 视频存储
+- [x] PWA（manifest + Service Worker）
+- [x] iOS/Safari 兼容适配
+- [x] 训练模式页面
+- [x] 技术标准参考页面
+- [x] 视频标注工具
+- [x] 成就徽章系统（4 枚基础徽章：首次完成 / 连击×5 / 连击×10 / 完美×10）
+- [x] 设置面板
+- [x] 新手引导（放置设备 → 站位 → 开始训练）
+- [x] 单动作练习模式（选定动作后只运行对应检测器，双页设置均可切换并持久化）
+
+### 计划中（P3） 🔮
+
+- [ ] 格挡位置分类（3/4/5 号位）
+- [ ] 训练统计仪表盘
+- [ ] 扩展成就（累计次数 / 连续天数类徽章）
+- [ ] 引导式训练序列
+- [ ] 慢动作回放 + 关键帧标注
+
+### 已知缺陷 ⚠️
+
+完整缺陷与漏洞清单（含优先级与修复状态）维护在 [mvp-defects.md](mvp-defects.md)。截至 2026-06-10：技术债 10 项全部处置，P0×3 / P1×9 全部修复，剩余 P2×6 打磨项。检测类修复待实地验收确认。

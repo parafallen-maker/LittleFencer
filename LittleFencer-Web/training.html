@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="description" content="LittleFencer - 佩剑训练助手">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="小剑客训练">
+
+    <title>小剑客训练 ⚔️</title>
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="assets/icons/ic_launcher.png">
+    <link rel="apple-touch-icon" href="assets/icons/ic_launcher_round.png">
+    <link rel="stylesheet" href="css/training.css">
+
+    <!-- MediaPipe -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <!-- 启动画面 -->
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-content">
+            <div class="splash-icon">⚔️</div>
+            <h1>小剑客训练</h1>
+            <p id="loading-text">正在加载AI教练...</p>
+            <div class="progress-container">
+                <div class="progress-bar" id="loading-progress"></div>
+            </div>
+            <div class="loading-spinner"></div>
+        </div>
+    </div>
+
+    <!-- 训练界面 -->
+    <div id="training-app" class="training-app hidden">
+        <!-- 视频区域 -->
+        <div class="video-container">
+            <video id="video" playsinline></video>
+            <canvas id="skeleton-canvas"></canvas>
+
+            <!-- 顶部状态栏 -->
+            <div class="top-bar">
+                <button id="btn-settings" class="icon-btn">⚙️</button>
+                <div class="status-badge" id="status-badge">
+                    <span id="status-text">准备就绪</span>
+                </div>
+                <button id="btn-camera-flip" class="icon-btn">🔄</button>
+            </div>
+
+            <!-- 大字反馈区 -->
+            <div class="feedback-overlay" id="feedback-overlay">
+                <div class="feedback-text" id="feedback-text"></div>
+            </div>
+
+            <!-- Combo计数 -->
+            <div class="combo-display" id="combo-display">
+                <div class="combo-number" id="combo-number">0</div>
+                <div class="combo-label">连续正确</div>
+            </div>
+
+            <!-- 速度显示 -->
+            <div class="speed-display" id="speed-display">
+                <div class="speed-current">
+                    <span class="speed-label">本次</span>
+                    <span class="speed-value" id="speed-current">--</span>
+                </div>
+                <div class="speed-diff" id="speed-diff"></div>
+            </div>
+
+            <!-- 视频进度条 (仅视频测试模式显示) -->
+            <div class="video-progress" id="video-progress">
+                <span class="time-current" id="time-current">0:00</span>
+                <input type="range" id="progress-bar" min="0" max="100" value="0" step="0.1">
+                <span class="time-total" id="time-total">0:00</span>
+            </div>
+        </div>
+
+        <!-- 录制指示器 -->
+        <div class="recording-indicator hidden" id="recording-indicator">
+            <span class="recording-dot"></span>
+            <span>录制中</span>
+        </div>
+
+        <!-- 底部控制栏 -->
+        <div class="bottom-bar">
+            <button id="btn-record" class="control-btn" title="录制">
+                <span class="btn-icon">⏺️</span>
+                <span class="btn-label">录制</span>
+            </button>
+
+            <button id="btn-start" class="primary-btn">
+                <span class="btn-icon">▶️</span>
+                <span class="btn-text">开始训练</span>
+            </button>
+
+            <button id="btn-gallery" class="control-btn" title="视频库">
+                <span class="btn-icon">📹</span>
+                <span class="btn-label">回放</span>
+            </button>
+        </div>
+
+        <!-- 错误恢复覆盖层 -->
+        <div id="error-overlay" class="error-overlay hidden">
+            <div class="error-content">
+                <div class="error-icon">⚠️</div>
+                <p id="error-message">摄像头错误</p>
+                <button id="btn-retry" class="primary-btn">
+                    <span class="btn-icon">🔄</span>
+                    <span class="btn-text">重试</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 训练总结弹窗 -->
+        <div id="session-summary" class="session-summary hidden">
+            <div class="summary-content">
+                <h2>🏁 训练完成</h2>
+                <div class="summary-stats">
+                    <div class="summary-stat">
+                        <span class="stat-value" id="summary-lunges">0</span>
+                        <span class="stat-label">弓步次数</span>
+                    </div>
+                    <div class="summary-stat">
+                        <span class="stat-value" id="summary-combo">0</span>
+                        <span class="stat-label">最佳连击</span>
+                    </div>
+                    <div class="summary-stat">
+                        <span class="stat-value" id="summary-avg-speed">--</span>
+                        <span class="stat-label">平均速度</span>
+                    </div>
+                    <div class="summary-stat">
+                        <span class="stat-value" id="summary-duration">0:00</span>
+                        <span class="stat-label">训练时长</span>
+                    </div>
+                </div>
+                <button id="btn-close-summary" class="primary-btn">
+                    <span class="btn-icon">👍</span>
+                    <span class="btn-text">继续训练</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 设置面板 -->
+    <div id="settings-panel" class="settings-panel hidden">
+        <div class="settings-content">
+            <h2>⚙️ 设置</h2>
+            <div class="setting-item">
+                <span>语音反馈</span>
+                <label class="switch">
+                    <input type="checkbox" id="voice-enabled" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <span>音效</span>
+                <label class="switch">
+                    <input type="checkbox" id="sound-enabled" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <span>骨骼显示</span>
+                <label class="switch">
+                    <input type="checkbox" id="skeleton-visible" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <span>练习动作</span>
+                <select id="practice-action" class="practice-select">
+                    <option value="all">全部动作</option>
+                    <option value="advance">前进步</option>
+                    <option value="retreat">后退步</option>
+                    <option value="lunge">弓步</option>
+                    <option value="advance_lunge">前进弓步</option>
+                    <option value="balestra_lunge">跳步弓步</option>
+                    <option value="flunge">飞弓步</option>
+                    <option value="parry_riposte">格挡反攻</option>
+                </select>
+            </div>
+            <button id="btn-close-settings" class="secondary-btn">关闭</button>
+        </div>
+    </div>
+
+    <!-- 首次使用引导 -->
+    <div id="onboarding-panel" class="onboarding-panel hidden">
+        <div class="onboarding-content">
+            <div class="onboarding-step" data-step="1">
+                <div class="onboarding-icon">📱</div>
+                <h2>欢迎使用小剑客训练！</h2>
+                <p>将设备放在稳定的位置，确保能拍到全身</p>
+            </div>
+            <div class="onboarding-step hidden" data-step="2">
+                <div class="onboarding-icon">🧍</div>
+                <h2>保持距离</h2>
+                <p>站在距离摄像头2-3米处，确保AI能看到你的全身</p>
+            </div>
+            <div class="onboarding-step hidden" data-step="3">
+                <div class="onboarding-icon">⚔️</div>
+                <h2>开始训练</h2>
+                <p>做弓步，AI会实时指导你的姿势</p>
+            </div>
+            <div class="onboarding-dots">
+                <span class="dot active" data-dot="1"></span>
+                <span class="dot" data-dot="2"></span>
+                <span class="dot" data-dot="3"></span>
+            </div>
+            <button id="btn-onboarding-next" class="primary-btn">下一步</button>
+        </div>
+    </div>
+
+    <!-- Gallery 模态框 -->
+    <div id="gallery-modal" class="modal hidden">
+        <div class="modal-content gallery-modal-content">
+            <div class="modal-header">
+                <h2>📹 训练回放</h2>
+                <button class="modal-close" id="btn-close-gallery">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="gallery-stats" id="gallery-stats">
+                    <span id="video-count">0 个视频</span>
+                </div>
+                <div class="gallery-grid" id="gallery-grid">
+                    <div class="empty-state" id="empty-gallery">
+                        <p>还没有录制视频</p>
+                        <p class="empty-hint">点击录制按钮开始</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 视频播放模态框 -->
+    <div id="video-player-modal" class="modal hidden">
+        <div class="modal-content video-player-content">
+            <div class="modal-header">
+                <h2>📹 视频回放</h2>
+                <button class="modal-close" id="btn-close-player">&times;</button>
+            </div>
+            <div class="video-player-container">
+                <video id="playback-video" controls playsinline></video>
+            </div>
+            <div class="video-info">
+                <div class="video-meta">
+                    <span id="video-date">--</span>
+                    <span id="video-duration">--</span>
+                </div>
+            </div>
+            <div class="video-actions">
+                <button class="video-action-btn" id="btn-share-video">
+                    <span class="btn-icon">📤</span>
+                    <span>分享</span>
+                </button>
+                <button class="video-action-btn danger" id="btn-delete-video">
+                    <span class="btn-icon">🗑️</span>
+                    <span>删除</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认对话框 -->
+    <div id="confirm-dialog" class="modal hidden">
+        <div class="modal-content confirm-dialog-content">
+            <div class="confirm-icon">⚠️</div>
+            <h3>确认删除</h3>
+            <p>确定要删除这个视频吗？</p>
+            <div class="confirm-buttons">
+                <button class="confirm-btn cancel" id="btn-confirm-cancel">取消</button>
+                <button class="confirm-btn danger" id="btn-confirm-ok">删除</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/training-mode.js"></script>
+</body>
+
+</html>

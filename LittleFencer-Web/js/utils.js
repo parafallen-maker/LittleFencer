@@ -11,13 +11,29 @@
  * @returns {number} Angle in degrees
  */
 export function calculateAngle(a, b, c) {
+    // Degenerate input (missing/NaN points or coincident with the vertex)
+    // returns NaN so threshold comparisons fail closed instead of
+    // producing a bogus 0°/180° that looks like a real measurement.
+    if (!a || !b || !c ||
+        !isFinite(a.x) || !isFinite(a.y) ||
+        !isFinite(b.x) || !isFinite(b.y) ||
+        !isFinite(c.x) || !isFinite(c.y)) {
+        return NaN;
+    }
+
+    const EPS = 1e-6;
+    if ((Math.abs(a.x - b.x) < EPS && Math.abs(a.y - b.y) < EPS) ||
+        (Math.abs(c.x - b.x) < EPS && Math.abs(c.y - b.y) < EPS)) {
+        return NaN;
+    }
+
     const radians = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
     let angle = Math.abs(radians * 180.0 / Math.PI);
-    
+
     if (angle > 180.0) {
         angle = 360.0 - angle;
     }
-    
+
     return angle;
 }
 
@@ -25,9 +41,10 @@ export function calculateAngle(a, b, c) {
  * Calculate distance between two points
  * @param {Object} a First point {x, y}
  * @param {Object} b Second point {x, y}
- * @returns {number} Distance
+ * @returns {number} Distance (NaN on missing/invalid input — comparisons fail closed)
  */
 export function calculateDistance(a, b) {
+    if (!a || !b) return NaN;
     const dx = b.x - a.x;
     const dy = b.y - a.y;
     return Math.sqrt(dx * dx + dy * dy);
@@ -140,6 +157,23 @@ export function lerp(a, b, t) {
  * @param {number} deltaTime Time between frames in ms
  * @returns {Object} Velocity {x, y, magnitude}
  */
+/**
+ * Parse JSON with a fallback — corrupted localStorage must never
+ * crash page initialization.
+ * @param {string|null} text JSON string (may be null/empty)
+ * @param {*} fallback Value returned on null input or parse failure
+ * @returns {*} Parsed value or fallback
+ */
+export function safeJsonParse(text, fallback) {
+    if (!text) return fallback;
+    try {
+        return JSON.parse(text);
+    } catch (e) {
+        console.warn('[Utils] JSON parse failed, using fallback:', e.message);
+        return fallback;
+    }
+}
+
 export function calculateVelocity(current, previous, deltaTime) {
     if (!previous || deltaTime <= 0) {
         return { x: 0, y: 0, magnitude: 0 };

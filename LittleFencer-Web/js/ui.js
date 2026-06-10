@@ -6,26 +6,27 @@
 
 import { ActionDisplayNames } from './detectors/index.js';
 import { platform } from './platform.js';
+import { safeJsonParse } from './utils.js';
 
 // Badge definitions
 const BADGES = {
     first_rep: {
-        image: 'assets/images/badge_first_rep.png',
+        image: 'assets/images/badge_first_rep.webp',
         title: '🎉 首次完成！',
         desc: '完成了第一个动作'
     },
     combo_5: {
-        image: 'assets/images/badge_combo_5.png',
+        image: 'assets/images/badge_combo_5.webp',
         title: '🔥 5连击！',
         desc: '连续完成5个动作'
     },
     combo_10: {
-        image: 'assets/images/badge_combo_10.png',
+        image: 'assets/images/badge_combo_10.webp',
         title: '⚡ 10连击！',
         desc: '连续完成10个动作'
     },
     perfect_10: {
-        image: 'assets/images/badge_perfect_10.png',
+        image: 'assets/images/badge_perfect_10.webp',
         title: '🏆 完美大师！',
         desc: '累计10个完美动作'
     }
@@ -34,25 +35,26 @@ const BADGES = {
 export class UIManager {
     constructor(app) {
         this.app = app;
-        
+
         // Elements
         this.elements = {};
-        
+
         // Timeouts
         this.feedbackTimeout = null;
         this.actionTimeout = null;
-        
+
         // Onboarding state
         this.currentSlide = 0;
         this.hasSeenOnboarding = localStorage.getItem('littlefencer_onboarding_done') === 'true';
-        
+
         // Badge tracking
-        this.earnedBadges = JSON.parse(localStorage.getItem('littlefencer_badges') || '[]');
-        
+        this.earnedBadges = safeJsonParse(localStorage.getItem('littlefencer_badges'), []);
+        if (!Array.isArray(this.earnedBadges)) this.earnedBadges = [];
+
         // iOS install prompt tracking
         this.hasShownIOSInstallPrompt = localStorage.getItem('littlefencer_ios_install_shown') === 'true';
     }
-    
+
     /**
      * Initialize UI
      */
@@ -88,17 +90,24 @@ export class UIManager {
             badgePopup: document.getElementById('badge-popup'),
             badgeImage: document.getElementById('badge-image'),
             badgeTitle: document.getElementById('badge-title'),
-            badgeDesc: document.getElementById('badge-desc')
+            badgeDesc: document.getElementById('badge-desc'),
+            // Visibility elements
+            visibilityIndicator: document.getElementById('visibility-indicator'),
+            visibilityFill: document.getElementById('visibility-fill'),
+            visibilityStatus: document.getElementById('visibility-status'),
+            visibilityParts: document.getElementById('visibility-parts'),
+            positionGuide: document.getElementById('position-guide'),
+            guideText: document.getElementById('guide-text')
         };
-        
+
         // Setup event listeners
         this.setupEventListeners();
         this.setupOnboarding();
-        
+
         // Show iOS install prompt if applicable
         this.checkIOSInstallPrompt();
     }
-    
+
     /**
      * Check and show iOS install prompt
      */
@@ -111,13 +120,13 @@ export class UIManager {
             }, 3000);
         }
     }
-    
+
     /**
      * Show iOS PWA install instructions
      */
     showIOSInstallPrompt() {
         const instructions = platform.getInstallInstructions();
-        
+
         // Create prompt element
         const prompt = document.createElement('div');
         prompt.className = 'ios-install-prompt';
@@ -134,16 +143,16 @@ export class UIManager {
                 <button class="ios-install-close">&times;</button>
             </div>
         `;
-        
+
         document.body.appendChild(prompt);
-        
+
         // Add close handler
         prompt.querySelector('.ios-install-close').addEventListener('click', () => {
             prompt.remove();
             localStorage.setItem('littlefencer_ios_install_shown', 'true');
             this.hasShownIOSInstallPrompt = true;
         });
-        
+
         // Auto-dismiss after 15 seconds
         setTimeout(() => {
             if (prompt.parentNode) {
@@ -151,24 +160,24 @@ export class UIManager {
             }
         }, 15000);
     }
-    
+
     /**
      * Setup onboarding
      */
     setupOnboarding() {
         if (!this.hasSeenOnboarding && this.elements.onboarding) {
             this.elements.onboarding.classList.remove('hidden');
-            
+
             // Next button
             this.elements.btnOnboardingNext?.addEventListener('click', () => {
                 this.nextSlide();
             });
-            
+
             // Skip button
             this.elements.btnOnboardingSkip?.addEventListener('click', () => {
                 this.completeOnboarding();
             });
-            
+
             // Dots
             document.querySelectorAll('.onboarding-dots .dot').forEach(dot => {
                 dot.addEventListener('click', (e) => {
@@ -177,7 +186,7 @@ export class UIManager {
             });
         }
     }
-    
+
     /**
      * Go to next onboarding slide
      */
@@ -188,29 +197,29 @@ export class UIManager {
             this.completeOnboarding();
         }
     }
-    
+
     /**
      * Go to specific slide
      */
     goToSlide(index) {
         this.currentSlide = index;
-        
+
         // Update slides
         document.querySelectorAll('.onboarding-slide').forEach((slide, i) => {
             slide.classList.toggle('active', i === index);
         });
-        
+
         // Update dots
         document.querySelectorAll('.onboarding-dots .dot').forEach((dot, i) => {
             dot.classList.toggle('active', i === index);
         });
-        
+
         // Update button text
         if (this.elements.btnOnboardingNext) {
             this.elements.btnOnboardingNext.textContent = index === 2 ? '开始训练' : '下一步';
         }
     }
-    
+
     /**
      * Complete onboarding
      */
@@ -219,18 +228,18 @@ export class UIManager {
         localStorage.setItem('littlefencer_onboarding_done', 'true');
         this.hasSeenOnboarding = true;
     }
-    
+
     /**
      * Show badge popup
      */
     showBadge(badgeId) {
         const badge = BADGES[badgeId];
         if (!badge || this.earnedBadges.includes(badgeId)) return;
-        
+
         // Record badge
         this.earnedBadges.push(badgeId);
         localStorage.setItem('littlefencer_badges', JSON.stringify(this.earnedBadges));
-        
+
         // Show popup
         if (this.elements.badgePopup) {
             this.elements.badgeImage.src = badge.image;
@@ -238,7 +247,7 @@ export class UIManager {
             this.elements.badgeDesc.textContent = badge.desc;
             this.elements.badgePopup.classList.remove('hidden');
             this.elements.badgePopup.classList.add('show');
-            
+
             // Auto hide after 3 seconds
             setTimeout(() => {
                 this.elements.badgePopup.classList.remove('show');
@@ -248,7 +257,7 @@ export class UIManager {
             }, 3000);
         }
     }
-    
+
     /**
      * Check and award badges based on stats
      */
@@ -266,7 +275,7 @@ export class UIManager {
             this.showBadge('perfect_10');
         }
     }
-    
+
     /**
      * Setup event listeners
      */
@@ -275,33 +284,33 @@ export class UIManager {
         this.elements.btnStart.addEventListener('click', () => {
             this.app.toggle();
         });
-        
+
         // Record button
         this.elements.btnRecord.addEventListener('click', () => {
             this.app.toggleRecording();
         });
-        
+
         // Camera flip button
         this.elements.btnCamera.addEventListener('click', () => {
             this.app.flipCamera();
         });
-        
+
         // Sound toggle button
         this.elements.btnSound.addEventListener('click', () => {
             const enabled = this.app.toggleSound();
             this.elements.btnSound.querySelector('.btn-icon').textContent = enabled ? '🔊' : '🔇';
         });
-        
+
         // Gallery button
         this.elements.btnGallery.addEventListener('click', () => {
             this.showGallery();
         });
-        
+
         // Close gallery button
         this.elements.btnCloseGallery.addEventListener('click', () => {
             this.hideGallery();
         });
-        
+
         // Gallery tabs
         document.querySelectorAll('.gallery-tabs .tab-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -310,18 +319,18 @@ export class UIManager {
                 this.loadGalleryItems(e.target.dataset.tab);
             });
         });
-        
+
         // Close modals on backdrop click
         this.elements.galleryModal.addEventListener('click', (e) => {
             if (e.target === this.elements.galleryModal) {
                 this.hideGallery();
             }
         });
-        
+
         // Video player modal controls
         this.setupVideoPlayerControls();
     }
-    
+
     /**
      * Setup video player modal controls
      */
@@ -332,19 +341,19 @@ export class UIManager {
         const btnShareVideo = document.getElementById('btn-share-video');
         const btnDeleteVideo = document.getElementById('btn-delete-video');
         const playbackVideo = document.getElementById('playback-video');
-        
+
         // Close player
         btnClosePlayer?.addEventListener('click', () => {
             this.hideVideoPlayer();
         });
-        
+
         // Close on backdrop click
         playerModal?.addEventListener('click', (e) => {
             if (e.target === playerModal) {
                 this.hideVideoPlayer();
             }
         });
-        
+
         // Toggle star
         btnToggleStar?.addEventListener('click', async () => {
             if (!this.currentVideoId) return;
@@ -355,22 +364,22 @@ export class UIManager {
                 this.loadGalleryItems(this.currentFilter || 'starred');
             }
         });
-        
+
         // Share video
         btnShareVideo?.addEventListener('click', async () => {
             if (!this.currentVideoId) return;
             await this.app.shareVideo(this.currentVideoId);
         });
-        
+
         // Delete video
         btnDeleteVideo?.addEventListener('click', () => {
             this.showDeleteConfirmDialog();
         });
-        
+
         // Setup confirm dialog
         this.setupConfirmDialog();
     }
-    
+
     /**
      * Setup confirm dialog
      */
@@ -378,11 +387,11 @@ export class UIManager {
         const confirmDialog = document.getElementById('confirm-dialog');
         const btnConfirmCancel = document.getElementById('btn-confirm-cancel');
         const btnConfirmOk = document.getElementById('btn-confirm-ok');
-        
+
         btnConfirmCancel?.addEventListener('click', () => {
             confirmDialog?.classList.add('hidden');
         });
-        
+
         btnConfirmOk?.addEventListener('click', async () => {
             if (this.pendingDeleteId) {
                 const success = await this.app.deleteVideo(this.pendingDeleteId);
@@ -395,7 +404,7 @@ export class UIManager {
             }
             confirmDialog?.classList.add('hidden');
         });
-        
+
         // Close on backdrop
         confirmDialog?.addEventListener('click', (e) => {
             if (e.target === confirmDialog) {
@@ -403,7 +412,7 @@ export class UIManager {
             }
         });
     }
-    
+
     /**
      * Show delete confirmation dialog
      */
@@ -411,7 +420,7 @@ export class UIManager {
         this.pendingDeleteId = this.currentVideoId;
         document.getElementById('confirm-dialog')?.classList.remove('hidden');
     }
-    
+
     /**
      * Set training state
      */
@@ -419,7 +428,7 @@ export class UIManager {
         const btn = this.elements.btnStart;
         const icon = btn.querySelector('.btn-icon');
         const label = btn.querySelector('.btn-label');
-        
+
         if (isRunning) {
             btn.classList.add('active');
             icon.textContent = '⏹️';
@@ -430,14 +439,14 @@ export class UIManager {
             label.textContent = '开始';
         }
     }
-    
+
     /**
      * Set recording state
      */
     setRecordingState(isRecording) {
         const btn = this.elements.btnRecord;
         const indicator = this.elements.recordingIndicator;
-        
+
         if (isRecording) {
             btn.classList.add('recording');
             indicator.classList.remove('hidden');
@@ -446,7 +455,7 @@ export class UIManager {
             indicator.classList.add('hidden');
         }
     }
-    
+
     /**
      * Set status display
      */
@@ -454,45 +463,51 @@ export class UIManager {
         const badge = this.elements.statusBadge;
         const text = this.elements.statusText;
         const icon = badge.querySelector('.status-icon');
-        
+
         // Reset classes
-        badge.classList.remove('en-garde', 'lunging');
-        
+        badge.classList.remove('en-garde', 'lunging', 'waiting');
+
         switch (state) {
+            case 'WAITING_FULL_BODY':
+                icon.textContent = '📷';
+                text.textContent = '调整位置';
+                badge.classList.add('waiting');
+                break;
+
             case 'IDLE':
                 icon.textContent = '🎯';
                 text.textContent = '准备中';
                 break;
-                
+
             case 'EN_GARDE':
                 icon.textContent = '⚔️';
                 text.textContent = 'En Garde';
                 badge.classList.add('en-garde');
                 break;
-                
+
             case 'LUNGING':
                 icon.textContent = '🗡️';
                 text.textContent = '弓步!';
                 badge.classList.add('lunging');
                 break;
-                
+
             case 'RECOVERY':
                 icon.textContent = '↩️';
                 text.textContent = '回收';
                 break;
-                
+
             case 'ADVANCING':
                 icon.textContent = '➡️';
                 text.textContent = '前进';
                 break;
-                
+
             case 'RETREATING':
                 icon.textContent = '⬅️';
                 text.textContent = '后退';
                 break;
         }
     }
-    
+
     /**
      * Show action detection result
      */
@@ -500,15 +515,15 @@ export class UIManager {
         const overlay = this.elements.actionOverlay;
         const nameEl = this.elements.actionName;
         const qualityEl = this.elements.actionQuality;
-        
+
         // Clear previous timeout
         if (this.actionTimeout) {
             clearTimeout(this.actionTimeout);
         }
-        
+
         // Set content
         nameEl.textContent = ActionDisplayNames[action] || action;
-        
+
         // Quality emoji
         const qualityEmoji = {
             'PERFECT': '⭐',
@@ -516,35 +531,35 @@ export class UIManager {
             'ACCEPTABLE': '👍',
             'POOR': '❌'
         };
-        
+
         qualityEl.textContent = qualityEmoji[quality] || '';
         qualityEl.className = 'action-quality';
-        
+
         if (quality === 'PERFECT') {
             qualityEl.classList.add('perfect');
         }
-        
+
         // Show
         overlay.classList.add('show');
-        
+
         // Hide after delay
         this.actionTimeout = setTimeout(() => {
             overlay.classList.remove('show');
         }, 1500);
     }
-    
+
     /**
      * Set combo count
      */
     setCombo(count) {
         const container = this.elements.comboContainer;
         const countEl = this.elements.comboCount;
-        
+
         countEl.textContent = count;
-        
+
         if (count > 0) {
             container.classList.add('show');
-            
+
             // Fire animation at milestones
             if (count === 5 || count === 10 || count % 10 === 0) {
                 container.classList.add('fire');
@@ -554,51 +569,51 @@ export class UIManager {
             container.classList.remove('show');
         }
     }
-    
+
     /**
      * Show feedback toast
      */
     showFeedback(message, type = 'info') {
         const toast = this.elements.feedbackToast;
-        
+
         // Clear previous timeout
         if (this.feedbackTimeout) {
             clearTimeout(this.feedbackTimeout);
         }
-        
+
         // Set content
         toast.textContent = message;
         toast.className = 'feedback-toast';
-        
+
         if (type === 'error') {
             toast.classList.add('error');
         } else if (type === 'success') {
             toast.classList.add('success');
         }
-        
+
         // Show
         toast.classList.add('show');
-        
+
         // Hide after delay
         this.feedbackTimeout = setTimeout(() => {
             toast.classList.remove('show');
         }, 3000);
     }
-    
+
     /**
      * Update FPS display
      */
     updateFps(fps) {
         this.elements.fpsValue.textContent = fps;
     }
-    
+
     /**
      * Update duration display
      */
     updateDuration(duration) {
         this.elements.durationValue.textContent = duration;
     }
-    
+
     /**
      * Update stats display
      */
@@ -606,7 +621,82 @@ export class UIManager {
         this.elements.actionCount.textContent = stats.actionCount;
         this.elements.perfectCount.textContent = stats.perfectCount;
     }
-    
+
+    /**
+     * Update visibility indicator
+     */
+    updateVisibility(visibilityInfo) {
+        const { isFullBody, score, missingParts, visibleParts } = visibilityInfo;
+
+        // Update fill bar
+        const fill = this.elements.visibilityFill;
+        if (fill) {
+            fill.style.width = `${score}%`;
+            fill.classList.remove('low', 'medium', 'high');
+            if (score < 50) {
+                fill.classList.add('low');
+            } else if (score < 80) {
+                fill.classList.add('medium');
+            } else {
+                fill.classList.add('high');
+            }
+        }
+
+        // Update status text
+        const status = this.elements.visibilityStatus;
+        if (status) {
+            status.classList.remove('error', 'warning', 'success');
+            if (isFullBody) {
+                status.textContent = '✓ 全身已检测';
+                status.classList.add('success');
+            } else if (score > 50) {
+                status.textContent = `⚠ 部分遮挡 (${score}%)`;
+                status.classList.add('warning');
+            } else {
+                status.textContent = `✗ 请调整位置 (${score}%)`;
+                status.classList.add('error');
+            }
+        }
+
+        // Update parts display
+        const parts = this.elements.visibilityParts;
+        if (parts && missingParts.length > 0 && missingParts[0] !== '全部') {
+            parts.innerHTML = missingParts.slice(0, 4).map(p =>
+                `<span class="visibility-part missing">✗ ${p}</span>`
+            ).join('');
+        } else if (parts) {
+            parts.innerHTML = '';
+        }
+
+        // Update indicator style
+        const indicator = this.elements.visibilityIndicator;
+        if (indicator) {
+            indicator.classList.remove('warning', 'ready');
+            if (isFullBody) {
+                indicator.classList.add('ready');
+            } else if (score > 0) {
+                indicator.classList.add('warning');
+            }
+        }
+    }
+
+    /**
+     * Show/hide position guide
+     */
+    showPositionGuide(show, message = '请后退，确保全身入镜') {
+        const guide = this.elements.positionGuide;
+        if (guide) {
+            if (show) {
+                guide.classList.remove('hidden');
+                if (this.elements.guideText) {
+                    this.elements.guideText.textContent = message;
+                }
+            } else {
+                guide.classList.add('hidden');
+            }
+        }
+    }
+
     /**
      * Show gallery modal
      */
@@ -616,14 +706,14 @@ export class UIManager {
         await this.updateGalleryStats();
         await this.loadGalleryItems('starred');
     }
-    
+
     /**
      * Hide gallery modal
      */
     hideGallery() {
         this.elements.galleryModal.classList.add('hidden');
     }
-    
+
     /**
      * Update gallery stats
      */
@@ -631,27 +721,27 @@ export class UIManager {
         const stats = await this.app.getGalleryStats();
         const videoCountEl = document.getElementById('video-count');
         const starredCountEl = document.getElementById('starred-count');
-        
+
         if (videoCountEl) videoCountEl.textContent = `${stats.total} 个视频`;
         if (starredCountEl) starredCountEl.textContent = `${stats.starred} 个精彩`;
     }
-    
+
     /**
      * Load gallery items
      */
     async loadGalleryItems(filter) {
         const grid = this.elements.galleryGrid;
         this.currentFilter = filter;
-        
+
         // Show loading state
         grid.innerHTML = `
             <div class="loading-spinner">
                 <span>加载中...</span>
             </div>
         `;
-        
+
         const videos = await this.app.getGalleryVideos(filter);
-        
+
         if (videos.length === 0) {
             grid.innerHTML = `
                 <div class="empty-state">
@@ -662,13 +752,33 @@ export class UIManager {
             `;
             return;
         }
-        
-        grid.innerHTML = videos.map(video => `
-            <div class="gallery-item" data-id="${video.id}">
-                ${video.thumbnail 
-                    ? `<img src="${video.thumbnail}" alt="视频缩略图" class="thumbnail">`
-                    : `<div class="thumbnail" style="background: var(--secondary);"></div>`
+
+        // Revoke previous gallery thumbnail URLs
+        if (this._galleryThumbUrls) {
+            this._galleryThumbUrls.forEach(url => URL.revokeObjectURL(url));
+        }
+        this._galleryThumbUrls = [];
+
+        // Create Object URLs for Blob thumbnails
+        const videoItems = videos.map(video => {
+            let thumbSrc = null;
+            if (video.thumbnail) {
+                if (video.thumbnail instanceof Blob) {
+                    thumbSrc = URL.createObjectURL(video.thumbnail);
+                    this._galleryThumbUrls.push(thumbSrc);
+                } else {
+                    thumbSrc = video.thumbnail; // legacy string URL
                 }
+            }
+            return { ...video, thumbSrc };
+        });
+
+        grid.innerHTML = videoItems.map(video => `
+            <div class="gallery-item" data-id="${video.id}">
+                ${video.thumbSrc
+                ? `<img src="${video.thumbSrc}" alt="视频缩略图" class="thumbnail">`
+                : `<div class="thumbnail" style="background: var(--secondary);"></div>`
+            }
                 <div class="play-icon">▶️</div>
                 <span class="video-date">${this.formatDate(video.timestamp)}</span>
                 <div class="overlay">
@@ -677,7 +787,7 @@ export class UIManager {
                 </div>
             </div>
         `).join('');
-        
+
         // Add click handlers for playback
         grid.querySelectorAll('.gallery-item').forEach(item => {
             item.addEventListener('click', () => {
@@ -686,7 +796,7 @@ export class UIManager {
             });
         });
     }
-    
+
     /**
      * Open video player modal
      */
@@ -696,64 +806,64 @@ export class UIManager {
             this.showFeedback('视频加载失败', 'error');
             return;
         }
-        
+
         this.currentVideoId = videoId;
-        
+
         const playerModal = document.getElementById('video-player-modal');
         const playbackVideo = document.getElementById('playback-video');
         const videoDate = document.getElementById('video-date');
         const videoDuration = document.getElementById('video-duration');
         const videoActions = document.getElementById('video-actions');
         const videoPerfects = document.getElementById('video-perfects');
-        
+
         // Create object URL for video blob
         if (this.currentVideoUrl) {
             URL.revokeObjectURL(this.currentVideoUrl);
         }
         this.currentVideoUrl = URL.createObjectURL(video.blob);
         playbackVideo.src = this.currentVideoUrl;
-        
+
         // Update info
         if (videoDate) videoDate.textContent = this.formatFullDate(video.timestamp);
         if (videoDuration) videoDuration.textContent = this.formatDuration(video.duration);
         if (videoActions) videoActions.textContent = video.actionCount || 0;
         if (videoPerfects) videoPerfects.textContent = video.perfectCount || 0;
-        
+
         // Update star button
         this.updateStarButton(video.starred);
-        
+
         // Show modal
         playerModal?.classList.remove('hidden');
     }
-    
+
     /**
      * Hide video player modal
      */
     hideVideoPlayer() {
         const playerModal = document.getElementById('video-player-modal');
         const playbackVideo = document.getElementById('playback-video');
-        
+
         // Stop playback
         playbackVideo?.pause();
         playbackVideo.src = '';
-        
+
         // Clean up object URL
         if (this.currentVideoUrl) {
             URL.revokeObjectURL(this.currentVideoUrl);
             this.currentVideoUrl = null;
         }
-        
+
         this.currentVideoId = null;
         playerModal?.classList.add('hidden');
     }
-    
+
     /**
      * Update star button state
      */
     updateStarButton(isStarred) {
         const starIcon = document.getElementById('star-icon');
         const btnToggleStar = document.getElementById('btn-toggle-star');
-        
+
         if (starIcon) {
             starIcon.textContent = isStarred ? '⭐' : '☆';
         }
@@ -761,7 +871,7 @@ export class UIManager {
             btnToggleStar.classList.toggle('active', isStarred);
         }
     }
-    
+
     /**
      * Format date for gallery item (short format)
      */
@@ -769,7 +879,7 @@ export class UIManager {
         const date = new Date(timestamp);
         return `${date.getMonth() + 1}/${date.getDate()}`;
     }
-    
+
     /**
      * Format full date for video player
      */
@@ -781,7 +891,7 @@ export class UIManager {
         const mins = date.getMinutes().toString().padStart(2, '0');
         return `${month}月${day}日 ${hours}:${mins}`;
     }
-    
+
     /**
      * Format duration in seconds to mm:ss
      */
