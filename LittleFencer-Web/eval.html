@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>检测评测 - LittleFencer</title>
+    <link rel="icon" type="image/png" href="assets/icons/ic_launcher.png">
+
+    <!-- MediaPipe (与 training.html 相同的 CDN 依赖) -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+
+    <style>
+        :root {
+            --bg: #0a0a15;
+            --panel: #1a1a2e;
+            --border: rgba(255, 255, 255, 0.15);
+            --text: #eee;
+            --dim: #999;
+            --accent: #00e676;
+            --warn: #ff5252;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+            padding: 20px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        h1 { font-size: 22px; margin-bottom: 4px; }
+        h2 { font-size: 16px; margin: 18px 0 8px; color: var(--accent); }
+        .subtitle { color: var(--dim); font-size: 13px; margin-bottom: 16px; }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 14px;
+        }
+
+        .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+        .row label { min-width: 110px; color: var(--dim); font-size: 14px; }
+
+        input[type="file"], input[type="number"], textarea, button {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 10px;
+            font-size: 14px;
+        }
+
+        textarea { width: 100%; min-height: 80px; font-family: monospace; font-size: 13px; }
+
+        button {
+            cursor: pointer;
+            padding: 10px 22px;
+        }
+        button.primary { background: var(--accent); color: #000; font-weight: bold; border: none; }
+        button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        video { width: 100%; max-height: 320px; background: #000; border-radius: 8px; }
+
+        #status { font-size: 14px; color: var(--accent); min-height: 20px; }
+        #live-log {
+            font-family: monospace; font-size: 12px; color: var(--dim);
+            max-height: 140px; overflow-y: auto; white-space: pre-wrap;
+            background: rgba(0, 0, 0, 0.3); border-radius: 6px; padding: 8px; margin-top: 8px;
+        }
+
+        table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+        th, td { border: 1px solid var(--border); padding: 6px 10px; text-align: center; }
+        th { background: rgba(255, 255, 255, 0.06); }
+        td.good { color: var(--accent); }
+        td.bad { color: var(--warn); }
+
+        details { margin-top: 10px; }
+        summary { cursor: pointer; color: var(--accent); font-size: 14px; }
+        details ol, details ul { margin: 8px 0 8px 22px; font-size: 13px; line-height: 1.8; color: var(--dim); }
+        code { background: rgba(255, 255, 255, 0.1); padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+
+        .fp-list { font-family: monospace; font-size: 12px; color: var(--warn); }
+        .fn-list { font-family: monospace; font-size: 12px; color: #ffb74d; }
+    </style>
+</head>
+
+<body>
+    <h1>🎯 检测评测（离线回归）</h1>
+    <p class="subtitle">输入视频 + 标注基准 → 跑完整检测管线 → 输出查准率/查全率与误报清单。调参前后各跑一遍即可对比。</p>
+
+    <div class="panel">
+        <h2>1. 输入</h2>
+        <div class="row">
+            <label>测试视频</label>
+            <input type="file" id="video-file" accept="video/*">
+        </div>
+        <div class="row">
+            <label>标注 JSON</label>
+            <input type="file" id="annotation-file" accept=".json">
+            <span style="color:var(--dim);font-size:12px">（annotator.html 导出的格式）</span>
+        </div>
+        <div class="row">
+            <label>匹配容差（秒）</label>
+            <input type="number" id="tolerance" value="0.8" step="0.1" min="0" style="width:80px">
+            <span style="color:var(--dim);font-size:12px">检测时刻落在 [标注开始−容差, 标注结束+容差] 内且动作相同视为命中</span>
+        </div>
+        <div class="row" style="align-items:flex-start">
+            <label>参数覆盖</label>
+            <div style="flex:1">
+                <textarea id="config-overrides" placeholder='可选，深合并到 config.js，例如：
+{"detectors": {"advance": {"VELOCITY_START": 0.02}}, "gate": {"minVisibility": 0.6}, "arbitration": {"COOLDOWN_MS": 800}}'></textarea>
+            </div>
+        </div>
+        <div class="row">
+            <button class="primary" id="btn-run" disabled>▶ 开始评测</button>
+            <button id="btn-download" disabled>⬇ 下载结果 JSON</button>
+            <span id="status"></span>
+        </div>
+    </div>
+
+    <div class="panel">
+        <video id="video" muted playsinline></video>
+        <div id="live-log"></div>
+    </div>
+
+    <div class="panel" id="results-panel" style="display:none">
+        <h2>2. 结果</h2>
+        <div id="results-summary"></div>
+        <div id="results-table"></div>
+        <h2>误报清单（FP）</h2>
+        <div id="fp-list" class="fp-list">无</div>
+        <h2>漏报清单（FN）</h2>
+        <div id="fn-list" class="fn-list">无</div>
+    </div>
+
+    <div class="panel">
+        <details>
+            <summary>📖 使用指引：如何制作标注基准集</summary>
+            <ol>
+                <li>从仓库根目录起服务（datasets 才可访问）：<code>cd LittleFencer && python3 -m http.server 8080</code></li>
+                <li>打开 <code>http://localhost:8080/LittleFencer-Web/annotator.html</code>，导入 <code>datasets/test_videos/</code> 下的视频（如 test.mp4、sabre1.mp4）</li>
+                <li>播放/逐帧（← → 键逐帧）找到每个动作：在动作<b>开始帧</b>点"标记开始"，<b>结束帧</b>点"标记结束"，选择动作类型保存</li>
+                <li>标完整段视频后点"导出"，把 JSON 存到 <code>datasets/annotations/</code>（命名如 <code>test_2026-06-10.json</code>）</li>
+                <li>回到本页：选同一个视频 + 刚导出的 JSON → 开始评测</li>
+            </ol>
+            <ul>
+                <li><b>标注口径</b>：动作区间从起动帧到落地/恢复完成帧；检测器在动作完成时刻播报，所以容差默认放宽到 0.8s</li>
+                <li><b>必须 1x 速度</b>：检测器状态机用墙钟计时，本页强制原速播放，请勿手动调速</li>
+                <li><b>调参对比</b>：改 <code>js/config.js</code> 或直接在"参数覆盖"里写 JSON，跑两遍下载两份结果对比 totals.f1</li>
+            </ul>
+        </details>
+    </div>
+
+    <script type="module" src="js/eval.js"></script>
+</body>
+
+</html>

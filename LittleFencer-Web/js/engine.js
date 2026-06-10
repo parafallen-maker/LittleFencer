@@ -337,7 +337,12 @@ export class FencingStateEngine {
         this.noPoseFrames = 0;
 
         // Check full body visibility first - THIS IS CRITICAL
-        const visibility = this.checkFullBodyVisibility(landmarks);
+        // skipFullBodyCheck: video test / offline eval mode — recorded
+        // footage often doesn't keep the full body in frame, so the gate
+        // would lock the engine in WAITING and nothing would be detected.
+        const visibility = this.skipFullBodyCheck
+            ? { isFullBody: true, score: 100, missingParts: [] }
+            : this.checkFullBodyVisibility(landmarks);
 
         // DEBUG: Log visibility status every 30 frames (~1 second)
         if (Math.random() < 0.03) {

@@ -58,6 +58,7 @@ LittleFencer-Web/
 ├── training.html           # 训练模式（专注练习 + 速度追踪）
 ├── standards.html          # 技术标准参考（FIE 标准）
 ├── annotator.html          # 动作标注工具（教练用）
+├── eval.html               # 离线检测评测（开发用，查准/查全/F1）
 ├── manifest.json           # PWA 配置
 ├── sw.js                   # Service Worker（离线缓存）
 ├── serve.sh                # 开发服务器脚本
@@ -151,6 +152,15 @@ MediaPipe 原始输出
 > iOS Safari 需 14.5+ 版本才支持 MediaRecorder API
 
 ## 🔧 开发
+
+### 离线评测（调参回归）
+
+检测准确度可量化评测，调参前后跑两遍对比 F1：
+
+1. 从**仓库根目录**起服务：`python3 -m http.server 8080`（datasets 才可访问）
+2. 用 `annotator.html` 给 `datasets/test_videos/` 的视频标注动作区间，导出 JSON 存到 `datasets/annotations/`
+3. 打开 `eval.html`，选视频 + 标注 JSON → 开始评测 → 输出每动作查准/查全/F1 与误报清单，可下载 JSON
+4. 调参：直接改 [js/config.js](js/config.js)，或在评测页"参数覆盖"里写 JSON（如 `{"detectors":{"advance":{"VELOCITY_START":0.02}}}`），无需改代码即可对比
 
 ### 本地 HTTPS（可选）
 
