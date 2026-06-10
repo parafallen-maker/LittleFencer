@@ -145,6 +145,10 @@
                 <span class="btn-label">开始</span>
             </button>
 
+            <button class="control-btn" id="btn-settings" title="设置">
+                <span class="btn-icon">⚙️</span>
+                <span class="btn-label">设置</span>
+            </button>
             <button class="control-btn" id="btn-sound" title="声音">
                 <span class="btn-icon">🔊</span>
                 <span class="btn-label">声音</span>
@@ -296,6 +300,19 @@
                 <div class="setting-item">
                     <label>自动录制精彩动作</label>
                     <input type="checkbox" id="setting-autorecord" checked>
+                </div>
+                <div class="setting-item">
+                    <label>练习动作</label>
+                    <select id="setting-practice-action" class="practice-select">
+                        <option value="all">全部动作</option>
+                        <option value="advance">前进步</option>
+                        <option value="retreat">后退步</option>
+                        <option value="lunge">弓步</option>
+                        <option value="advance_lunge">前进弓步</option>
+                        <option value="balestra_lunge">跳步弓步</option>
+                        <option value="flunge">飞弓步</option>
+                        <option value="parry_riposte">格挡反攻</option>
+                    </select>
                 </div>
             </div>
         </div>

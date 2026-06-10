@@ -1004,16 +1004,42 @@ export class ActionDetectorManager {
         // Priority order: composite detectors first so a compound motion
         // (advance-lunge etc.) wins over its constituent simple action
         // when both complete on the same frame.
-        this.detectors = [
-            new AdvanceLungeDetector(),
-            new BalestraLungeDetector(),
-            new FlungeDetector(),
-            new ParryRiposteDetector(),
-            new LungeDetector(),
-            new AdvanceDetector(),
-            new RetreatDetector()
+        const entries = [
+            [SaberAction.ADVANCE_LUNGE, new AdvanceLungeDetector()],
+            [SaberAction.BALESTRA_LUNGE, new BalestraLungeDetector()],
+            [SaberAction.FLUNGE, new FlungeDetector()],
+            [SaberAction.PARRY_RIPOSTE, new ParryRiposteDetector()],
+            [SaberAction.LUNGE, new LungeDetector()],
+            [SaberAction.ADVANCE, new AdvanceDetector()],
+            [SaberAction.RETREAT, new RetreatDetector()]
         ];
+        this.detectors = entries.map(([action, detector]) => {
+            detector.actionType = action;
+            return detector;
+        });
         this.lastActionTime = 0;
+        this.enabledActions = null; // null = all actions enabled
+    }
+
+    /**
+     * Restrict detection to a subset of actions (single-action practice
+     * mode). Running only the detector being practiced removes
+     * cross-detector misclassification entirely.
+     * @param {Array<string>|string|null} actions SaberAction values;
+     *        null / 'all' / [] enables everything
+     */
+    setEnabledActions(actions) {
+        if (!actions || actions === 'all' ||
+            (Array.isArray(actions) && actions.length === 0)) {
+            this.enabledActions = null;
+        } else {
+            const list = Array.isArray(actions) ? actions : [actions];
+            this.enabledActions = new Set(list);
+        }
+        // Clear in-flight state left over from the previous mode
+        this.resetAll();
+        console.log('[Detectors] Enabled actions:',
+            this.enabledActions ? [...this.enabledActions].join(', ') : 'all');
     }
 
     /**
@@ -1037,6 +1063,9 @@ export class ActionDetectorManager {
         }
 
         for (const detector of this.detectors) {
+            if (this.enabledActions && !this.enabledActions.has(detector.actionType)) {
+                continue;
+            }
             const result = detector.detect(frame, history, velocityTracker);
             if (result) {
                 // One physical motion = one report: clear every other

@@ -10,6 +10,7 @@
  */
 
 import { FencingStateEngine, FencingState, FIE_STANDARDS } from './engine.js';
+import { safeJsonParse } from './utils.js';
 import { AudioFeedbackManager } from './feedback.js';
 import { SkeletonRenderer } from './skeleton.js';
 import { platform } from './platform.js';
@@ -90,6 +91,11 @@ class TrainingMode {
             this.loadTrainingHistory();
             console.log('  ✓ Settings loaded');
 
+            // Wire UI before the heavy model load: settings must stay
+            // usable even while (or if) MediaPipe is loading/unavailable.
+            this.setupEventListeners();
+            console.log('  ✓ Event listeners set up');
+
             this.updateProgress(30, '加载骨骼渲染器...');
 
             // Initialize skeleton renderer (pass ID, not element)
@@ -109,10 +115,6 @@ class TrainingMode {
             console.log('  ✓ MediaPipe Pose initialized');
 
             this.updateProgress(100, '准备完成！');
-
-            // Setup event listeners
-            this.setupEventListeners();
-            console.log('  ✓ Event listeners set up');
 
             // Small delay to show 100%
             await new Promise(r => setTimeout(r, 300));
@@ -167,27 +169,26 @@ class TrainingMode {
     }
 
     loadSettings() {
-        try {
-            const saved = localStorage.getItem('trainingSettings');
-            if (saved) {
-                const settings = JSON.parse(saved);
-                this.voiceEnabled = settings.voiceEnabled ?? true;
-                this.soundEnabled = settings.soundEnabled ?? true;
-                this.skeletonVisible = settings.skeletonVisible ?? true;
+        const settings = safeJsonParse(localStorage.getItem('trainingSettings'), null);
+        if (settings && typeof settings === 'object') {
+            this.voiceEnabled = settings.voiceEnabled ?? true;
+            this.soundEnabled = settings.soundEnabled ?? true;
+            this.skeletonVisible = settings.skeletonVisible ?? true;
+            this.practiceAction = settings.practiceAction ?? 'all';
 
-                // Update UI checkboxes
-                const voiceCheck = document.getElementById('voice-enabled');
-                const soundCheck = document.getElementById('sound-enabled');
-                const skeletonCheck = document.getElementById('skeleton-visible');
-                if (voiceCheck) voiceCheck.checked = this.voiceEnabled;
-                if (soundCheck) soundCheck.checked = this.soundEnabled;
-                if (skeletonCheck) skeletonCheck.checked = this.skeletonVisible;
+            // Update UI controls
+            const voiceCheck = document.getElementById('voice-enabled');
+            const soundCheck = document.getElementById('sound-enabled');
+            const skeletonCheck = document.getElementById('skeleton-visible');
+            const practiceSelect = document.getElementById('practice-action');
+            if (voiceCheck) voiceCheck.checked = this.voiceEnabled;
+            if (soundCheck) soundCheck.checked = this.soundEnabled;
+            if (skeletonCheck) skeletonCheck.checked = this.skeletonVisible;
+            if (practiceSelect) practiceSelect.value = this.practiceAction;
 
-                console.log('📂 Settings loaded:', settings);
-            }
-        } catch (e) {
-            console.warn('Failed to load settings:', e);
+            console.log('📂 Settings loaded:', settings);
         }
+        this.applyPracticeAction();
     }
 
     saveSettings() {
@@ -195,13 +196,22 @@ class TrainingMode {
             const settings = {
                 voiceEnabled: this.voiceEnabled,
                 soundEnabled: this.soundEnabled,
-                skeletonVisible: this.skeletonVisible
+                skeletonVisible: this.skeletonVisible,
+                practiceAction: this.practiceAction ?? 'all'
             };
             localStorage.setItem('trainingSettings', JSON.stringify(settings));
             console.log('💾 Settings saved:', settings);
         } catch (e) {
             console.warn('Failed to save settings:', e);
         }
+    }
+
+    /**
+     * Single-action practice: only run the detector being practiced
+     */
+    applyPracticeAction() {
+        const action = this.practiceAction ?? 'all';
+        this.engine.setEnabledActions(action === 'all' ? null : [action]);
     }
 
     async initPose() {
@@ -269,6 +279,13 @@ class TrainingMode {
 
         document.getElementById('skeleton-visible').addEventListener('change', (e) => {
             this.skeletonVisible = e.target.checked;
+            this.saveSettings();
+        });
+
+        // Practice action selector (single-action mode)
+        document.getElementById('practice-action')?.addEventListener('change', (e) => {
+            this.practiceAction = e.target.value;
+            this.applyPracticeAction();
             this.saveSettings();
         });
 

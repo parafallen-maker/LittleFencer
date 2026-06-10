@@ -557,6 +557,14 @@ export class FencingStateEngine {
     }
 
     /**
+     * Restrict detection to a subset of actions (single-action practice).
+     * @param {Array<string>|string|null} actions SaberAction values; null/'all' = everything
+     */
+    setEnabledActions(actions) {
+        this.detectorManager.setEnabledActions(actions);
+    }
+
+    /**
      * Run action detectors
      */
     runActionDetectors(frame) {

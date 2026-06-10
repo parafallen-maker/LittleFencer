@@ -1401,3 +1401,23 @@ html, body {
         transform: rotate(360deg);
     }
 }
+/* 练习动作选择器（单动作模式） */
+.practice-select {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text, #fff);
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.2));
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 16px;
+    outline: none;
+    cursor: pointer;
+}
+
+.practice-select:focus {
+    border-color: var(--accent, #00e676);
+}
+
+.practice-select option {
+    background: #1a1a2e;
+    color: #fff;
+}

@@ -48,7 +48,8 @@ class LittleFencerApp {
             voiceEnabled: true,
             soundEnabled: true,
             skeletonEnabled: true,
-            autoRecordEnabled: true
+            autoRecordEnabled: true,
+            practiceAction: 'all'
         };
         
         this.loadSettings();
@@ -83,7 +84,11 @@ class LittleFencerApp {
             // Initialize UI
             this.ui = new UIManager(this);
             this.ui.init();
-            
+
+            // Wire the settings modal before the heavy model load:
+            // settings must stay usable even if MediaPipe fails to load.
+            this.setupSettingsModal();
+
             this.updateLoadingProgress(20, '初始化摄像头...');
             
             // Initialize camera
@@ -102,6 +107,7 @@ class LittleFencerApp {
             
             // Initialize fencing state engine
             this.engine = new FencingStateEngine();
+            this.applyPracticeAction();
             
             // Initialize feedback manager
             this.feedback = new AudioFeedbackManager();
@@ -202,6 +208,61 @@ class LittleFencerApp {
         this.poseDetector.onResults = (results) => {
             this.handlePoseResults(results);
         };
+    }
+
+    /**
+     * Wire the settings modal (open/close, toggles, practice action)
+     */
+    setupSettingsModal() {
+        const modal = document.getElementById('settings-modal');
+        if (!modal) return;
+
+        document.getElementById('btn-settings')?.addEventListener('click', () => {
+            modal.classList.remove('hidden');
+        });
+        document.getElementById('btn-close-settings')?.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.add('hidden');
+        });
+
+        // Two-way binding for the toggles
+        const bindings = [
+            ['setting-voice', 'voiceEnabled'],
+            ['setting-sound', 'soundEnabled'],
+            ['setting-skeleton', 'skeletonEnabled'],
+            ['setting-autorecord', 'autoRecordEnabled']
+        ];
+        for (const [id, key] of bindings) {
+            const checkbox = document.getElementById(id);
+            if (!checkbox) continue;
+            checkbox.checked = this.settings[key];
+            checkbox.addEventListener('change', (e) => {
+                this.settings[key] = e.target.checked;
+                this.saveSettings();
+            });
+        }
+
+        // Practice action selector (single-action mode)
+        const practiceSelect = document.getElementById('setting-practice-action');
+        if (practiceSelect) {
+            practiceSelect.value = this.settings.practiceAction || 'all';
+            practiceSelect.addEventListener('change', (e) => {
+                this.settings.practiceAction = e.target.value;
+                this.applyPracticeAction();
+                this.saveSettings();
+            });
+        }
+    }
+
+    /**
+     * Single-action practice: only run the detector being practiced
+     */
+    applyPracticeAction() {
+        if (!this.engine) return;
+        const action = this.settings.practiceAction || 'all';
+        this.engine.setEnabledActions(action === 'all' ? null : [action]);
     }
     
     /**
