@@ -8,39 +8,39 @@ class PlatformDetector {
         this.userAgent = navigator.userAgent || '';
         this.platform = navigator.platform || '';
         this.vendor = navigator.vendor || '';
-        
+
         // Detect platform
         this._detectPlatform();
     }
-    
+
     _detectPlatform() {
         // iOS detection
-        this.isIOS = /iPad|iPhone|iPod/.test(this.userAgent) || 
-                     (this.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-        
+        this.isIOS = /iPad|iPhone|iPod/.test(this.userAgent) ||
+            (this.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
         // Safari detection
         this.isSafari = /^((?!chrome|android).)*safari/i.test(this.userAgent) ||
-                        (this.vendor.includes('Apple') && !this.userAgent.includes('CriOS'));
-        
+            (this.vendor.includes('Apple') && !this.userAgent.includes('CriOS'));
+
         // Chrome on iOS
         this.isIOSChrome = this.isIOS && /CriOS/.test(this.userAgent);
-        
+
         // Android detection
         this.isAndroid = /Android/.test(this.userAgent);
-        
+
         // Mobile detection
         this.isMobile = this.isIOS || this.isAndroid || /Mobile/.test(this.userAgent);
-        
+
         // PWA mode detection
         this.isPWA = window.matchMedia('(display-mode: standalone)').matches ||
-                     window.navigator.standalone === true;
-        
+            window.navigator.standalone === true;
+
         // WebGL support check
         this.hasWebGL = this._checkWebGL();
-        
+
         // WebGL2 support (better for MediaPipe)
         this.hasWebGL2 = this._checkWebGL2();
-        
+
         console.log('[Platform] Detected:', {
             isIOS: this.isIOS,
             isSafari: this.isSafari,
@@ -51,7 +51,7 @@ class PlatformDetector {
             hasWebGL2: this.hasWebGL2
         });
     }
-    
+
     _checkWebGL() {
         try {
             const canvas = document.createElement('canvas');
@@ -60,7 +60,7 @@ class PlatformDetector {
             return false;
         }
     }
-    
+
     _checkWebGL2() {
         try {
             const canvas = document.createElement('canvas');
@@ -69,7 +69,7 @@ class PlatformDetector {
             return false;
         }
     }
-    
+
     /**
      * Get optimized camera constraints for platform
      */
@@ -82,7 +82,7 @@ class PlatformDetector {
             },
             audio: false
         };
-        
+
         if (this.isIOS) {
             // iOS Safari requires specific constraints
             return {
@@ -95,37 +95,38 @@ class PlatformDetector {
                 audio: false
             };
         }
-        
+
         return base;
     }
-    
+
     /**
      * Get optimized MediaPipe settings for platform
      */
     getMediaPipeOptions() {
+        // Optimized for accuracy (use heavier model + higher confidence)
         const base = {
-            modelComplexity: 1,
+            modelComplexity: 2,  // Heavy model for best accuracy (0=lite, 1=full, 2=heavy)
             smoothLandmarks: true,
             enableSegmentation: false,
             smoothSegmentation: false,
-            minDetectionConfidence: 0.5,
-            minTrackingConfidence: 0.5
+            minDetectionConfidence: 0.7,  // Higher threshold for quality
+            minTrackingConfidence: 0.7
         };
-        
+
         if (this.isIOS || !this.hasWebGL2) {
-            // Use lighter model on iOS for better performance
+            // Use full model on iOS (compromise between speed and accuracy)
             return {
                 ...base,
-                modelComplexity: 0,  // Lite model
+                modelComplexity: 1,  // Full model (not lite)
                 smoothLandmarks: true,
-                minDetectionConfidence: 0.6,
-                minTrackingConfidence: 0.6
+                minDetectionConfidence: 0.7,
+                minTrackingConfidence: 0.7
             };
         }
-        
+
         return base;
     }
-    
+
     /**
      * Check if platform needs fallback pose detection
      */
@@ -133,7 +134,7 @@ class PlatformDetector {
         // iOS Safari without WebGL2 may have issues
         return this.isIOS && this.isSafari && !this.hasWebGL2;
     }
-    
+
     /**
      * Get recommended frame processing interval
      */
@@ -143,7 +144,7 @@ class PlatformDetector {
         }
         return 33; // ~30 FPS for other platforms
     }
-    
+
     /**
      * Check if can install PWA
      */
@@ -154,7 +155,7 @@ class PlatformDetector {
         }
         return 'BeforeInstallPromptEvent' in window || 'onbeforeinstallprompt' in window;
     }
-    
+
     /**
      * Get install instructions for platform
      */
@@ -170,7 +171,7 @@ class PlatformDetector {
                 icon: '📲'
             };
         }
-        
+
         return {
             title: '安装应用',
             steps: [
@@ -190,16 +191,16 @@ export const platform = new PlatformDetector();
  */
 export function setupVideoForIOS(videoElement) {
     if (!platform.isIOS) return;
-    
+
     // Required attributes for iOS
     videoElement.setAttribute('playsinline', '');
     videoElement.setAttribute('webkit-playsinline', '');
     videoElement.setAttribute('muted', '');
     videoElement.muted = true;
-    
+
     // Prevent fullscreen on iOS
     videoElement.style.objectFit = 'cover';
-    
+
     // Handle iOS video sizing
     videoElement.addEventListener('loadedmetadata', () => {
         // Force layout recalculation on iOS
@@ -232,7 +233,7 @@ export async function requestWakeLock() {
  */
 export function unlockAudioForIOS(audioContext) {
     if (!platform.isIOS) return Promise.resolve();
-    
+
     return new Promise((resolve) => {
         const unlock = async () => {
             if (audioContext.state === 'suspended') {
@@ -242,10 +243,10 @@ export function unlockAudioForIOS(audioContext) {
             document.removeEventListener('click', unlock);
             resolve();
         };
-        
+
         document.addEventListener('touchstart', unlock, { once: true });
         document.addEventListener('click', unlock, { once: true });
-        
+
         // Also try to unlock immediately if already interacted
         if (audioContext.state !== 'suspended') {
             resolve();
@@ -261,7 +262,7 @@ export async function checkPermissions() {
         camera: 'unknown',
         microphone: 'unknown'
     };
-    
+
     if ('permissions' in navigator) {
         try {
             const cameraResult = await navigator.permissions.query({ name: 'camera' });
@@ -270,6 +271,6 @@ export async function checkPermissions() {
             // Some browsers don't support camera permission query
         }
     }
-    
+
     return permissions;
 }

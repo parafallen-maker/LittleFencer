@@ -97,3 +97,12 @@ Podfile.lock
 # Web
 dist/
 *.local
+.gstack/
+
+# 本地实验区（不入库）
+datasets/
+genesis/
+skills/
+.agent/
+归档.zip
+.DS_Store

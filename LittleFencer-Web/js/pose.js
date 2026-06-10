@@ -18,40 +18,40 @@ export class PoseDetector {
         this.frameSkipCount = 0;
         this.maxFrameSkip = platform.isIOS ? 2 : 1; // Skip more frames on iOS
     }
-    
+
     /**
      * Initialize pose detector
      */
     async init(onProgress) {
         console.log('[Pose] Initializing MediaPipe Pose...');
         console.log('[Pose] Platform:', platform.isIOS ? 'iOS' : platform.isAndroid ? 'Android' : 'Desktop');
-        
+
         // Wait for MediaPipe to load
         if (typeof Pose === 'undefined') {
             throw new Error('MediaPipe Pose library not loaded');
         }
-        
+
         // Create Pose instance
         this.pose = new Pose({
             locateFile: (file) => {
                 return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
             }
         });
-        
+
         // Get platform-optimized options
         const options = platform.getMediaPipeOptions();
         console.log('[Pose] Using options:', options);
-        
+
         // Configure pose options
         this.pose.setOptions(options);
-        
+
         // Set results callback
         this.pose.onResults((results) => {
             if (this.onResults) {
                 this.onResults(results);
             }
         });
-        
+
         // Initialize (download model)
         try {
             await this.pose.initialize();
@@ -66,21 +66,21 @@ export class PoseDetector {
                 throw err;
             }
         }
-        
+
         if (onProgress) {
             onProgress(1.0);
         }
-        
+
         console.log('[Pose] MediaPipe Pose initialized');
     }
-    
+
     /**
      * Set video element for pose detection
      */
     setVideoElement(videoElement) {
         this.videoElement = videoElement;
     }
-    
+
     /**
      * Start pose detection loop
      */
@@ -88,34 +88,34 @@ export class PoseDetector {
         if (!this.videoElement) {
             throw new Error('Video element not set');
         }
-        
+
         if (this.isRunning) return;
-        
+
         this.isRunning = true;
         this.lastProcessTime = 0;
         this.frameSkipCount = 0;
         this.processLoop();
-        
+
         console.log('[Pose] Started');
     }
-    
+
     /**
      * Processing loop using requestAnimationFrame
      * With throttling for iOS performance
      */
     async processLoop() {
         if (!this.isRunning) return;
-        
+
         const now = performance.now();
         const elapsed = now - this.lastProcessTime;
-        
+
         // Throttle processing on iOS to maintain performance
         if (elapsed >= this.processingInterval && this.videoElement.readyState >= 2) {
             // Additional frame skipping for iOS
             this.frameSkipCount++;
             if (this.frameSkipCount >= this.maxFrameSkip) {
                 this.frameSkipCount = 0;
-                
+
                 try {
                     await this.pose.send({ image: this.videoElement });
                     this.lastProcessTime = now;
@@ -129,37 +129,53 @@ export class PoseDetector {
                 }
             }
         }
-        
+
         this.animationFrameId = requestAnimationFrame(() => this.processLoop());
     }
-    
+
     /**
      * Stop pose detection
      */
     stop() {
         this.isRunning = false;
-        
+
         if (this.animationFrameId) {
             cancelAnimationFrame(this.animationFrameId);
             this.animationFrameId = null;
         }
-        
+
         console.log('[Pose] Stopped');
     }
-    
+
     /**
      * Process single frame
      */
     async processFrame(imageElement) {
         if (!this.pose) return null;
-        
+
         return new Promise((resolve) => {
             const originalCallback = this.onResults;
+
+            // Timeout protection: resolve with null after 5s
+            const timeout = setTimeout(() => {
+                this.onResults = originalCallback;
+                resolve(null);
+            }, 5000);
+
             this.onResults = (results) => {
+                clearTimeout(timeout);
                 this.onResults = originalCallback;
                 resolve(results);
             };
-            this.pose.send({ image: imageElement });
+
+            try {
+                this.pose.send({ image: imageElement });
+            } catch (err) {
+                clearTimeout(timeout);
+                this.onResults = originalCallback;
+                console.warn('[Pose] processFrame error:', err);
+                resolve(null);
+            }
         });
     }
 }

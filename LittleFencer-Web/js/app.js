@@ -182,6 +182,11 @@ class LittleFencerApp {
             this.handleFeedback(message, type);
         };
         
+        // Visibility change callback
+        this.engine.onVisibilityChange = (visibilityInfo) => {
+            this.handleVisibilityChange(visibilityInfo);
+        };
+        
         // Pose detector callback
         this.poseDetector.onResults = (results) => {
             this.handlePoseResults(results);
@@ -320,6 +325,13 @@ class LittleFencerApp {
     }
     
     /**
+     * Handle visibility change from engine
+     */
+    handleVisibilityChange(visibilityInfo) {
+        this.ui.updateVisibility(visibilityInfo);
+    }
+    
+    /**
      * Handle state change from engine
      */
     handleStateChange(state, data) {
@@ -330,7 +342,21 @@ class LittleFencerApp {
         
         // Handle specific states
         switch (state) {
+            case 'WAITING_FULL_BODY':
+                // Show position guide
+                this.ui.showPositionGuide(true);
+                if (this.settings.voiceEnabled) {
+                    this.feedback.speak('请后退，确保全身入镜');
+                }
+                break;
+                
+            case 'IDLE':
+                // Hide position guide when full body detected
+                this.ui.showPositionGuide(false);
+                break;
+                
             case 'EN_GARDE':
+                this.ui.showPositionGuide(false);
                 if (this.settings.voiceEnabled) {
                     this.feedback.speak('好！保持姿势');
                 }

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>动作标注工具 - 小剑客</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/annotator.css">
+</head>
+
+<body>
+    <div class="annotator-container">
+        <!-- Header -->
+        <header class="annotator-header">
+            <a href="index.html" class="back-btn">← 返回训练</a>
+            <h1>🎯 动作标注工具</h1>
+            <div class="header-actions">
+                <button id="importBtn" class="btn-secondary">📂 导入视频</button>
+                <button id="exportBtn" class="btn-primary">💾 导出数据</button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="annotator-main">
+            <!-- Video Panel -->
+            <section class="video-panel">
+                <div class="video-container">
+                    <video id="videoPlayer" controls></video>
+                    <canvas id="skeletonOverlay"></canvas>
+                </div>
+
+                <!-- Video Controls -->
+                <div class="video-controls">
+                    <button id="prevFrameBtn" class="frame-btn">⏮ 上一帧</button>
+                    <button id="playPauseBtn" class="play-btn">▶️ 播放</button>
+                    <button id="nextFrameBtn" class="frame-btn">下一帧 ⏭</button>
+                    <span class="frame-info">
+                        帧: <span id="currentFrame">0</span> / <span id="totalFrames">0</span>
+                    </span>
+                    <span class="time-info">
+                        时间: <span id="currentTime">0:00</span>
+                    </span>
+                </div>
+
+                <!-- Timeline -->
+                <div class="timeline-container">
+                    <div id="timeline" class="timeline">
+                        <div id="timelineProgress" class="timeline-progress"></div>
+                        <div id="annotationMarkers" class="annotation-markers"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Annotation Panel -->
+            <aside class="annotation-panel">
+                <!-- Action Selector -->
+                <div class="action-selector">
+                    <h3>📋 动作类型</h3>
+                    <div class="action-buttons">
+                        <button class="action-btn" data-action="en_garde" data-color="#4CAF50">
+                            🤺 准备姿势
+                        </button>
+                        <button class="action-btn" data-action="lunge" data-color="#FF5722">
+                            ⚔️ 弓步
+                        </button>
+                        <button class="action-btn" data-action="advance" data-color="#2196F3">
+                            👣 前进步
+                        </button>
+                        <button class="action-btn" data-action="retreat" data-color="#9C27B0">
+                            🔙 后退步
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Marking Controls -->
+                <div class="marking-controls">
+                    <h3>🎬 标注操作</h3>
+                    <div class="mark-buttons">
+                        <button id="markStartBtn" class="mark-btn mark-start">
+                            ▶ 标记起点
+                        </button>
+                        <button id="markEndBtn" class="mark-btn mark-end" disabled>
+                            ◼ 标记终点
+                        </button>
+                    </div>
+                    <div class="current-marking" id="currentMarking" style="display: none;">
+                        <span>当前标注: </span>
+                        <span id="markingAction">-</span>
+                        <span>从帧 <span id="markingStart">-</span></span>
+                    </div>
+                </div>
+
+                <!-- Confirmation Buttons (shown after marking end) -->
+                <div class="confirm-selector" id="confirmSelector" style="display: none;">
+                    <h3>✨ 确认标注</h3>
+                    <div class="confirm-info" id="confirmInfo"></div>
+                    <div class="confirm-buttons">
+                        <button id="confirmValidBtn" class="confirm-btn confirm-valid">✅ 可用</button>
+                        <button id="confirmDiscardBtn" class="confirm-btn confirm-discard">❌ 丢弃</button>
+                    </div>
+                </div>
+
+                <!-- Annotations List -->
+                <div class="annotations-list">
+                    <h3>📝 已标注动作 (<span id="annotationCount">0</span>)</h3>
+                    <ul id="annotationsList"></ul>
+                </div>
+
+                <!-- Stats -->
+                <div class="annotation-stats">
+                    <h3>📊 统计</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">准备姿势</span>
+                            <span class="stat-value" id="statEnGarde">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">弓步</span>
+                            <span class="stat-value" id="statLunge">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">前进步</span>
+                            <span class="stat-value" id="statAdvance">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">后退步</span>
+                            <span class="stat-value" id="statRetreat">0</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+
+        <!-- Hidden file input -->
+        <input type="file" id="videoInput" accept="video/*" style="display: none;">
+        <input type="file" id="skeletonInput" accept=".json" style="display: none;">
+    </div>
+
+    <!-- Import Modal -->
+    <div id="importModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>导入数据</h2>
+            <div class="import-options">
+                <div class="import-option">
+                    <h4>📹 选择视频文件</h4>
+                    <button id="selectVideoBtn" class="btn-primary">选择视频</button>
+                    <span id="videoFileName">未选择</span>
+                </div>
+                <div class="import-option">
+                    <h4>🦴 选择骨骼数据 (可选)</h4>
+                    <button id="selectSkeletonBtn" class="btn-secondary">选择JSON</button>
+                    <span id="skeletonFileName">未选择</span>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button id="cancelImportBtn" class="btn-secondary">取消</button>
+                <button id="confirmImportBtn" class="btn-primary" disabled>开始标注</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 快捷键帮助按钮 -->
+    <button id="shortcutHelpBtn" class="shortcut-help-btn" title="键盘快捷键">❓</button>
+
+    <!-- 快捷键帮助面板 -->
+    <div id="shortcutPanel" class="shortcut-panel hidden">
+        <div class="shortcut-panel-content">
+            <h3>⌨️ 键盘快捷键</h3>
+            <div class="shortcut-list">
+                <div class="shortcut-item"><kbd>Space</kbd><span>播放/暂停</span></div>
+                <div class="shortcut-item"><kbd>←</kbd><span>上一帧</span></div>
+                <div class="shortcut-item"><kbd>→</kbd><span>下一帧</span></div>
+                <div class="shortcut-item"><kbd>[</kbd><span>标记起点</span></div>
+                <div class="shortcut-item"><kbd>]</kbd><span>标记终点</span></div>
+                <div class="shortcut-item"><kbd>1</kbd><span>准备 (En Garde)</span></div>
+                <div class="shortcut-item"><kbd>2</kbd><span>弓步 (Lunge)</span></div>
+                <div class="shortcut-item"><kbd>3</kbd><span>前进 (Advance)</span></div>
+                <div class="shortcut-item"><kbd>4</kbd><span>后退 (Retreat)</span></div>
+                <div class="shortcut-item"><kbd>Enter/Y</kbd><span>确认标注</span></div>
+                <div class="shortcut-item"><kbd>Esc/N</kbd><span>取消标注</span></div>
+            </div>
+            <button id="closeShortcutPanel" class="btn-secondary" style="margin-top:12px;width:100%">关闭</button>
+        </div>
+    </div>
+
+    <script type="module" src="js/annotator.js"></script>
+</body>
+
+</html>
