@@ -103,6 +103,6 @@ dist/
 datasets/
 genesis/
 skills/
-.agent/
+.agent
 归档.zip
 .DS_Store
